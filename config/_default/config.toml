@@ -1,18 +1,33 @@
 # Change baseurl before deploy
 baseurl = "https://riveroverflow.pages.dev"
-languageCode = "en-us"
-title = "Hugo Theme Stack Starter"
+title = "Chaewoon's Blog"
 
 # Theme i18n support
 # Available values: en, fr, id, ja, ko, pt-br, zh-cn, zh-tw, es, de, nl, it, th, el, uk, ar
-defaultContentLanguage = "en"
+defaultContentLanguage = "ko"
 
 # Set hasCJKLanguage to true if DefaultContentLanguage is in [zh-cn ja ko]
 # This will make .Summary and .WordCount behave correctly for CJK languages.
-hasCJKLanguage = false
+hasCJKLanguage = true
 
 # Change it to your Disqus shortname before using
 disqusShortname = "hugo-theme-stack"
+
+[languages]
+    [languages.en]
+        languageCode = 'en-US'
+        languageName = 'English'
+        weight = 1
+        [languages.en.params.sidebar]
+            subtitle = 'Not just filling - overflowing'
+
+    [languages.ko]
+        languageCode = 'ko-KR'
+        languageName = '한국어'
+        weight = 2
+        [languages.ko.params.sidebar]
+            subtitle = '넘치게 채우기'
+
 
 [pagination]
 pagerSize = 5
