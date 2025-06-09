@@ -2,9 +2,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1'>
 
 <!--Google Search Console Meta Tag-->
-{{ with .Site.Params.google_verification }}
-  <meta name="google-site-verification" content="{{ . }}">
-{{ end }}
+<meta name="google-site-verification" content="dciCRenPaXS3_uLRcdEkxj9I4g23Zgk3M7d5QkQVs2g" />
 
 {{- $description := partialCached "data/description" . .RelPermalink -}}
 <meta name='description' {{ printf "content=%q" $description | safeHTMLAttr }}>
