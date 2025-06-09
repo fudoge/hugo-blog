@@ -31,3 +31,7 @@ disqusShortname = "hugo-theme-stack"
 
 [pagination]
 pagerSize = 5
+
+[services]
+  [services.googleAnalytics]
+    id = 'G-NVWKFG7JEX'
