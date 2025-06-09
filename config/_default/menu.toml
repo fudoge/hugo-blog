@@ -10,15 +10,26 @@
 [[social]]
 identifier = "github"
 name = "GitHub"
-url = "https://github.com/CaiJimmy/hugo-theme-stack"
+url = "https://github.com/fudoge"
+weight = 1
 
 [social.params]
 icon = "brand-github"
 
-[[social]]
-identifier = "twitter"
-name = "Twitter"
-url = "https://twitter.com"
+[[social]] 
+identifier = "leetcode"
+name = "LeetCode"
+url = "https://leetcode.com/u/fudoge/"
+weight = 2
 
 [social.params]
-icon = "brand-twitter"
+icon = "brand-leetcode"
+
+[[social]]
+identifier = "codeforces"
+name = "Codeforces"
+url = "https://codeforces.com/profile/riveroverflow"
+weight = 3
+
+[[social.params]]
+icon = "chart-bar"
