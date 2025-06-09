@@ -13,6 +13,8 @@ hasCJKLanguage = true
 # Change it to your Disqus shortname before using
 disqusShortname = "hugo-theme-stack"
 
+google_verification = "dciCRenPaXS3_uLRcdEkxj9I4g23Zgk3M7d5QkQVs2g"
+
 [languages]
     [languages.en]
         languageCode = 'en-US'
