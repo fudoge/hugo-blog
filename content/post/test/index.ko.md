@@ -6,7 +6,7 @@ image:
 license: 
 hidden: false
 comments: true
-draft: true
+draft: false
 slug: "test"
 categories:
     - testcategory
