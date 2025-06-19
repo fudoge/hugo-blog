@@ -12,7 +12,7 @@ hasCJKLanguage = true
 
 [comments]
     enabled = true
-    provider = cusdis
+    provider = "cusdis"
 
     [comments.cusdis]
     host = "https://cusdis.com"
