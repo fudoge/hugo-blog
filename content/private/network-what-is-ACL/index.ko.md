@@ -1,5 +1,6 @@
 ---
 title: "ACL(Access Control List란)"
+slug: "network-what-is-ACL"
 description: What is ACL
 date: 2025-06-25T23:29:36+09:00
 image:

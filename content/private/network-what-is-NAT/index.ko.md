@@ -1,5 +1,6 @@
 ---
 title: "NAT(Network Address Translation)"
+slug: "network-what-is-NAT"
 description: What is NAT?
 date: 2025-06-26T00:39:51+09:00
 image: 
