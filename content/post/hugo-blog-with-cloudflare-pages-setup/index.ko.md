@@ -24,6 +24,7 @@ Hugo를 통해서 고성능의 정적 사이트를 빠르게 만들고 관리할
 ## Hugo 설치
 [Install GoHugo](https://gohugo.io/getting-started/installing)
 
+
 ## 테마 설치
 여기서는 [hugo-theme-stack](https://stack.jimmycai.com/)을 이용했다.  
 다른 테마를 원한다면, [여기](themes.gohugo.io)에서 둘러볼 수 있지만, 다른 테마를 이용시, 배포 단계 이전까지는 별도의 설정 과정이 필요하다.  
@@ -71,6 +72,7 @@ git commit -m "First commit"
 git push origin main
 ```
 
+
 ## Cloudflare Pages에 연동
 
 우선, baseURL을 설정해주자.
@@ -94,6 +96,7 @@ Settings -> Variables and Secrets에서 `HUGO_VERSION`에서 현재 로컬의 HU
 다시 배포해보자. 성공적으로 배포됨을 알 수 있다!  
 이제, 레포지토리에서 푸시만 하면 빌드-배포가 자동으로 이루어진다.
 ![빌드 및 배포 성공](cloudflare_pages_deployed.png)
+
 
 ## References
 - [Stack Theme Document](https://stack.jimmycai.com/)
