@@ -2,7 +2,7 @@
 title: "Hugo Blog 시작하기 + CloudFlare Pages로 배포하기"
 description: Hugo Blog Setup Guide With Cloudflare Pages Deploy
 date: 2025-06-25T22:22:24+09:00
-image: 
+image: "hugo-logo.png"
 math: true
 hidden: false
 comments: true
@@ -19,7 +19,7 @@ tags:
 ---
 
 Hugo는 Go로 작성된 고성능의 정적 사이트 생성 도구이다.   
-Hugo를 통해서 고성능의 정적 사이트를 빠르게 만들고 관리할 수 있고, GitHub Pages 또는 Cloudflare Pages를 통해서 쉽고 무료로 배포할 수 있다.
+Hugo를 통해서 고성능의 정적 사이트를 빠르게 만들고 관리할 수 있고, GitHub Pages 또는 Cloudflare Pages를 통해서 쉽고 저렴하게 배포할 수 있다.
 
 ## Hugo 설치
 [Install GoHugo](https://gohugo.io/getting-started/installing)
