@@ -7,6 +7,9 @@ math: true
 hidden: false
 comments: true
 draft: false
+private: true
+_build:
+    list: false
 ---
 
 Router는 **ACL(Access-Control List)** 를 사용하여 트래픽을 필터링하거나, 식별한 후, 암호화 및 변환(NAT), 그리고 QoS(Quality of Service) 작업을 수행할 수 있다.  

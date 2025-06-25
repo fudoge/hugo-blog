@@ -7,6 +7,9 @@ math: true
 hidden: false
 comments: true
 draft: false
+private: true
+_build:
+    list: false
 ---
 
 **NAT(Network Address Translation)** 은 RFC 1631에 정의된 기술로, IP Header의 주소를 다른 주소로 바꾸는 기술이다.  
