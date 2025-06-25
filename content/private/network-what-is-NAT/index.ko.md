@@ -16,7 +16,8 @@ _build:
 **NAT(Network Address Translation)** 은 RFC 1631에 정의된 기술로, IP Header의 주소를 다른 주소로 바꾸는 기술이다.  
 주로 사설 IP를 가진 호스트들이 인터넷(Internet)을 이용할 수 있도록 설정해준다.  
 꼭 Private-IP <-> Public-IP 만 바꾸는 것이 아닌, 여러 IP주소들의 변환 체인으로 이루어져 있는 경우가 많다.  
-번외로, PAT(Port Address Translation) 역시 존재한다.
+번외로, PAT(Port Address Translation) 역시 존재한다.  
+PAT는 여러 사설 IP가 **하나의 공인 IP를 공유** 하면서, **포트 번호**를 이용해 각각을 구분하는 방식이다.
 
 
 - 정적 NAT는 외부 주소로 들어온 요청을 내부 서버로 전달될 수 있도록 목적지 주소로 변환하는 기능이다.  
