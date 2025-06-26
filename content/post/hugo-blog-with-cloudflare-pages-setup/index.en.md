@@ -1,6 +1,6 @@
 ---
-title: "Hugo Blog With Cloudflare Pages Setup"
-description: Hugo Blog Setup Guide With Cloudflare Pages Deploy
+title: "How to deploy Hugo Blog Using Cloudflare Pages(2025 Guide)"
+description: How to deploy Hugo Blog Using Cloudflare Pages(2025 Guide)
 date: 2025-06-25T22:22:24+09:00
 image: "hugo-logo.png"
 math: true
@@ -21,16 +21,17 @@ Hugo is a high-performance static site generator written in go.
 With Hugo, you can create static site and manage them efficiently.
 You can easily deploy it with GitHub Pages and Cloudflare Pages.
 
-## Install Hugo
+## 🚀Install Hugo
 [Install GoHugo](https://gohugo.io/getting-started/installing)
 
 
-## Install Theme
+## 🎨Install Theme
 I used [hugo-theme-stack](https://stack.jimmycai.com/),
 If you want another one, you can browse in [here](themes.gohugo.io)
 
-In [Hugo-theme-stack-starter](https://github.com/CaiJimmy/hugo-theme-stack-starter/), select `Use This Template` and load to your repository.  
-The developer of this theme uses GitHub Pages for deploy, but I chose Cloudflare Pages because of its performance and access-control features.  
+Start with [Hugo-theme-stack-starter](https://github.com/CaiJimmy/hugo-theme-stack-starter/) template.  
+Fork it to your repository using `Use This Template`.  
+While the original author uses GitHub Pages, I preferred Cloudflare Pages for better performance and access control.
 ![Creating a new repository via Use This Template](hugo_create_new_repo.png)
 
 Then, clone it to local.  
@@ -74,7 +75,7 @@ git push origin main
 ```
 
 
-## Deploy to Cloudflare Pages
+## ☁️Deploy to Cloudflare Pages
 
 First, we have to change baseURL.
 If you don't change baseURL, your deployed blog might have broken links.
@@ -96,11 +97,11 @@ In Settings -> Variables and Secrets, change `HUGO_VERSION` to your local Hugo v
 You can easily see them in `hugo version`.
 ![Env setup](cloudflare_pages_env.png)
 
-Now, try deploy again.
-You have your own Hugo blog now!
+Deploy again. Now, You have your own Hugo blog now!
+Feel free to customize your content, update the theme, and start writing awesome posts!
 ![Build and Deployment Successful](cloudflare_pages_deployed.png)
 
 
-## References
+## 📚References
 - [Stack Theme Document](https://stack.jimmycai.com/)
 - [Stack Theme Starter](https://github.com/CaiJimmy/hugo-theme-stack-starter)
