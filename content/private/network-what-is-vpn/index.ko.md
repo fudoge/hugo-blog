@@ -1,6 +1,6 @@
 ---
 title: "VPN(Virtual Private Network)"
-slug: what-is-vpn
+slug: network-what-is-vpn
 description: 
 date: 2025-06-26T23:21:13+09:00
 image: 
