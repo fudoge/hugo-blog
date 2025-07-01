@@ -21,11 +21,11 @@ Hugo is a high-performance static site generator written in go.
 With Hugo, you can create static site and manage them efficiently.
 You can easily deploy it with GitHub Pages and Cloudflare Pages.
 
-## 🚀Install Hugo
+## 🚀 Install Hugo
 [Install GoHugo](https://gohugo.io/getting-started/installing)
 
 
-## 🎨Install Theme
+## 🎨 Install Theme
 I used [hugo-theme-stack](https://stack.jimmycai.com/),
 If you want another one, you can browse in [here](themes.gohugo.io)
 
@@ -75,7 +75,7 @@ git push origin main
 ```
 
 
-## ☁️Deploy to Cloudflare Pages
+## ☁️ Deploy to Cloudflare Pages
 
 First, we have to change baseURL.
 If you don't change baseURL, your deployed blog might have broken links.
@@ -102,6 +102,6 @@ Feel free to customize your content, update the theme, and start writing awesome
 ![Build and Deployment Successful](cloudflare_pages_deployed.png)
 
 
-## 📚References
+## 📚 References
 - [Stack Theme Document](https://stack.jimmycai.com/)
 - [Stack Theme Starter](https://github.com/CaiJimmy/hugo-theme-stack-starter)

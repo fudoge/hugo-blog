@@ -18,7 +18,7 @@ tags:
     - Cloudflare Pages
 ---
 
-## 기본적인 설정 파일 구성
+## 🧩 기본적인 설정 파일 구성
 
 다국어 블로그 운영을 당장 해놓을 생각이 없더라도, 미리 구조를 잡아 놓는 것이 편할 수도 있다.
 
@@ -81,7 +81,7 @@ pagerSize = 5
 
 
 
-## 다국어 페이지 작성법
+## 📝 다국어 페이지 작성법
 글을 작성할 때, 아래와 같은 구조를 사용해야 한다:
 
 ![Post Directory Structure](00_multilingual_directory.png)
@@ -131,7 +131,7 @@ hugo server -D
 게시글을 들어가서, English를 눌러보면, 이렇게 번역 페이지로 이동한 것을 볼 수 있다!   
 ![English Version of the Page](02_english_article.png)
 
-## 게시글 이외의 영역들에도  다국어 세팅해두기
+## 🎭 게시글 이외의 영역들에도 다국어 세팅해두기
 영어 번역 페이지에는 사이드바다 비어있는 걳을 볼 수 있다.
 page, content, 등등의 home역할을 하는 마크다운 파일들도 다국어 세팅을 각각 해줘야만 한다.  
 categories또한 마찬가지이다.
@@ -142,7 +142,7 @@ Pages가 무엇인지와, categories가 무엇인지에 대해서는 다음 게�
 아래와 같이 Content내부의 Markdown 파일들도 다국어로 구성해주면 된다!
 ![Content_directory](03_content_directory.png)
 
-## References
+## 📚 References
 [Stack by Jimmicai - config/i18n](https://stack.jimmycai.com/config/i18n)  
 [Hugo Documnet - content management/multilingual](https://gohugo.io/content-management/multilingual/)  
 [Hugo Document - configuration/languages](https://gohugo.io/configuration/languages/)

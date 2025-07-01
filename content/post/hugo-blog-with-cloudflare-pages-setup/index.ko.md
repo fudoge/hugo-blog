@@ -21,18 +21,18 @@ tags:
 Hugo는 Go로 작성된 고성능의 정적 사이트 생성 도구이다.   
 Hugo를 통해서 고성능의 정적 사이트를 빠르게 만들고 관리할 수 있고, GitHub Pages 또는 Cloudflare Pages를 통해서 쉽고 저렴하게 배포할 수 있다.
 
-## 🚀Hugo 설치
+## 🚀 Hugo 설치
 [Install GoHugo](https://gohugo.io/getting-started/installing)
 
 
-## 🎨테마 설치
+## 🎨 테마 설치
 여기서는 [hugo-theme-stack](https://stack.jimmycai.com/)을 이용했다.  
 다른 테마를 원한다면, [여기](themes.gohugo.io)에서 둘러볼 수 있지만, 다른 테마를 이용시, 배포 단계 이전까지는 별도의 설정 과정이 필요하다.  
 
 [Hugo-theme-stack-starter](https://github.com/CaiJimmy/hugo-theme-stack-starter/)에서 `Use This Template`를 눌러주고, 자신의 레포지토리로 불러온다.  
 이 테마의 제작자는 GitHub Pages를 기본으로 전제하였지만, 여기서는 Cloudflare의 성능 및 접근제한 기능 때문에 Cloudflare Pages를 선택했다.  
 ![Use This Template를 통한 새로운 레포지토리 생성](hugo_create_new_repo.png)
-
+wq
 그 뒤, 로컬에 불러와준다:  
 ```bash
 git clone https://github.com/fudoge/hugo-blog.git
@@ -73,7 +73,7 @@ git push origin main
 ```
 
 
-## ☁️Cloudflare Pages에 연동
+## ☁️ Cloudflare Pages에 연동
 
 우선, baseURL을 설정해주자.
 `config/_default/config.toml`에서 baseURL을 수정해준다.
@@ -98,6 +98,6 @@ Settings -> Variables and Secrets에서 `HUGO_VERSION`에서 현재 로컬의 HU
 ![빌드 및 배포 성공](cloudflare_pages_deployed.png)
 
 
-## 📚References
+## 📚 References
 - [Stack Theme Document](https://stack.jimmycai.com/)
 - [Stack Theme Starter](https://github.com/CaiJimmy/hugo-theme-stack-starter)
