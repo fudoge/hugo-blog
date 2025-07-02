@@ -80,7 +80,7 @@ pagerSize = 5
 ```
 
 
-
+---
 ## 📝 다국어 페이지 작성법
 글을 작성할 때, 아래와 같은 구조를 사용해야 한다:
 
@@ -112,7 +112,7 @@ date: 2025-06-03
 ```markdown
 ---
 title: 다국어 테스트
-slug: "Mulitlingual Test"
+slug: "Multilingual Test"
 date: 2025-06-03
 ---
 
@@ -131,17 +131,22 @@ hugo server -D
 게시글을 들어가서, English를 눌러보면, 이렇게 번역 페이지로 이동한 것을 볼 수 있다!   
 ![English Version of the Page](02_english_article.png)
 
+---
 ## 🎭 게시글 이외의 영역들에도 다국어 세팅해두기
-영어 번역 페이지에는 사이드바다 비어있는 걳을 볼 수 있다.
+영어 번역 페이지에는 사이드바다 비어있는 것을 볼 수 있다.
 page, content, 등등의 home역할을 하는 마크다운 파일들도 다국어 세팅을 각각 해줘야만 한다.  
 categories또한 마찬가지이다.
 
 Pages가 무엇인지와, categories가 무엇인지에 대해서는 다음 게시글에서 확인할 수 있다.  
 일단은 현재 있는 것들에 대해서만 번역 레플리카를 만들어주자.
 
-아래와 같이 Content내부의 Markdown 파일들도 다국어로 구성해주면 된다!
+아래와 같이 Content내부의 Markdown 파일들도 다국어로 구성해주면 된다!  
 ![Content_directory](03_content_directory.png)
 
+만약 더 추가적인 설정이 하고 싶다면, `i18n/<언어코드>.toml`을 만들어서 기존 설정을 오버라이드 하면 된다.  
+기존 i18n 파일들의 설정은 [여기](https://github.com/CaiJimmy/hugo-theme-stack/tree/master/i18n)에서 확인가능하다.  
+
+---
 ## 📚 References
 [Stack by Jimmicai - config/i18n](https://stack.jimmycai.com/config/i18n)  
 [Hugo Documnet - content management/multilingual](https://gohugo.io/content-management/multilingual/)  
