@@ -1,5 +1,5 @@
 ---
-title: "Hugo Blog Basic Configuration"
+title: "Hugo Theme Stack에서 기본 커스터마이징"
 description: "Hugo-Theme-Stack에서 기본적인 세팅 커스터마이징"
 date: 2025-07-06T23:13:21+09:00
 image: "hugo-logo.png"
