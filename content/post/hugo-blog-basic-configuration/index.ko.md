@@ -8,6 +8,16 @@ license:
 hidden: false
 comments: true
 draft: false
+
+ 
+slug: "hugo-blog-basic-config-setup"
+categories:
+    - Blog
+    - Gohugo
+tags:
+    - Blog
+    - Gohugo
+    - Cloudflare Pages
 ---
 
 배포 파이프라인 및 국제화 세팅까지 구성했으니, 본격적인 블로그의 세팅을 건드려 볼 것이다.
