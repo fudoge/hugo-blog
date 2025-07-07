@@ -72,13 +72,22 @@ default = "Licensed under CC BY-NC-SA 4.0"
 - `subtitle`은 이미 언어별로 개별설정되어있다면, 딱히 의미는 없다. 
 - `avatar`를 수정하여 아바타 변경이 가능하다. 
 위처럼 작성한 경우, `/assets/img/avatar.png`에 사진이 있어야 한다.  
-사진의 이미지는 150 x 150이어야 한다.
+사진의 이미지는 150 x 150이어야 한다.  
+
+
 
 ### article
 - `math = true`로 설정하여 전역적으로 KaTex기반의 수식 사용이 가능해진다.
 
+이제, 수식을 작성할 수 있다!  
+Inline: $E=mc^2$  
+Block:
+$$
+\int_{a}^{b} x^2 dx
+$$
+
 ### footer
-`since`를 수정하여 내 블로그의 생성일에 맞게 지정해주었다.
+- `since`를 수정하여 내 블로그의 생성일에 맞게 지정해주었다.
 
 ---
 ## 🧑‍🎨 Custom Menu 수정
