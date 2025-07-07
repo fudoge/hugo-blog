@@ -35,6 +35,7 @@ Podman등의 위협적인 존재가 있지만, 여전히 Docker는 가장 많이
 ---
 
 ## 🆚 가상 머신 VS 컨테이너
+![VM vs Container](vm-vs-container.png)
 
 **가상 머신(Virtual Machine)** 은 하드웨어를 가상화한 것이다.  
 하나의 물리적인 컴퓨터 위에 여러 개의 운영체제(OS)를 독립적으로 실행할 수 있다.  
