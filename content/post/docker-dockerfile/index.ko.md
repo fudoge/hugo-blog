@@ -93,9 +93,12 @@ Docker 컨테이너를 만드는 과정을 햄버거를 만드는 과정과 같�
 
 이미지는 base이미지부터 시작해서, Read-Only의 레이어들이 쌓인다.  
 이 레이어들은 변경사항만을 담는다.  
-파일시스템을 변경하는 명령들(`COPY`, `RUN`, `ADD`등)은 새로운 레이어를 쌓는다.  
+명령들이 실행되면,  새로운 레이어를 쌓는다.  
 이는 Git의 Commit을 하는 것과 같다고 보면 된다.  
 이러한 레이어들은 재사용되면 빠른 빌드가 가능하고, 저장공간 역시 아낄 수 있다.
+
+Container에서는 RW가 가능한 Container Layer를 `run`과 동시에 받는다.  
+Container Layer는 컨테이너의 고유한 **변경사항**인 것이다.
 
 ![Dockerfile에서 Container까지](from-dockerfile-to-container.png)
 
@@ -134,11 +137,13 @@ COPY --from=nginx:latest /etc/nginx/ningx.conf /nginx.conf
 └── Dockerfile
 ```
 
-`go.mod`
+**go.mod**
 ```Go
 module example/hello
 go 1.19
 ```
+
+**main.go**
 
 ```Go
 package main
@@ -218,7 +223,7 @@ go           bullseye        a90b6c1268f5   6 minutes ago        999MB
 └── Dockerfile
 ```
 
-`install_docker_engine.sh`
+**install_docker_engine.sh**
 ```bash
 set -e
 
@@ -237,7 +242,7 @@ echo \
 apt-get update
 ```
 
-`Dockerfile`
+**Dockerfile**
 ```Dockerfile
 FROM ubuntu:22.04
 
@@ -293,6 +298,8 @@ RUN CGO_ENABLED=0 go build -o main
 CMD [ "/app/main" ]
 ```
 
+`ARG`는 `FROM`마다 스코프가 초기화되어, 새로 선언해주어야 한다.  
+여기에서 첫 번쨰 `ARG OS`는 `FROM`에 주입하기 위해 쓰였고, 두 번째 `ARG OS`는 `FROM`이후의 스코프에서 쓰인다.  
 
 이미지를 만들고, 이미지 리스트를 확인해보자:
 ```bash
@@ -320,3 +327,94 @@ echo $BASE
 
 > alpine
 ```
+
+---
+## 🏁 빌드 캐시
+이미지를 빌드할 때, 캐시되는 경우에 빠르게 빌드할 수 있다.  
+이미지는 레이어들의 집합이고, 변경사항들인 각 레이어들은 immutable하다.  
+즉, 동일한 이전의 레이어가 있다면, 그 레이어까지는 캐시되고, 이후의 작업만 한다면 빌드 속도가 매우 빨라질 것이다.  
+
+캐시의 조건은 다음과 같다:
+- 앞선 레이어가 같을 것
+- 수행하는 명령어가 같을 것
+- (ADD의 경우) 파일의 checksum이 동일할 것
+
+소스 코드, 패키지, 환경 변수들 중에 자주 바뀌는 것은 무엇일까?  
+정렬해보면 다음과 같을 것이다:
+1. 소스 코드
+2. 패키지
+3. 환경 변수
+
+아래의 `Dockerfile`을 생각해보자:
+```Dockerfile
+FROM
+RUN
+ENV
+ADD
+CMD
+ENTRYPOINT
+```
+
+각 레이어별로 첫 빌드에서 이러한 레이어들이 추가되었다고 해보자.
+- `FROM` → A
+- `COPY` → B
+- `RUN` → C
+- `ENV` → D
+- `ADD` → E
+- `CMD` → F
+- `ENTRYPOINT` → G
+
+소스코드를 바꿔서 COPY부터 새로운 변경사항이 있다고 해보자.  
+다시 빌드해보면..
+
+- `FROM` → A(Cached)
+- `COPY` → B`(새로 생성된 레이어)
+- `RUN` → C`(새로 생성된 레이어)
+- `ENV` → D`(새로 생성된 레이어)
+- `ADD` → E`(새로 생성된 레이어)
+- `CMD` → F`(새로 생성된 레이어)
+- `ENTRYPOINT` → G`(새로 생성된 레이어)
+
+RUN(패키지), ENV(환경변수)는 변경이 없음에도, 이전의 레이어가 변경되었기에, 새로 레이어를 만들어야 한다.  
+**즉, 빈번히 자주 바뀌는 것들은 아래쪽에 하는게 좋고, 변경사항이 자주 일어나지 않는 것들을 먼저 실행하여 캐시를 최대한 활용하는 것이 좋다.**
+
+### 캐시 사용에서 주의할 점
+아래의 `Dockerfile`을 생각해보자:
+```Dockerfile
+FROM ubuntu:22.04
+RUN apt-get update
+```
+
+이 Dockerfile은 오래 전에 실행되어 캐시가 되어 있다고 해보자.  
+그러나, apt-get update의 결과물은 변경되어있을 수도 있다.  
+이 경우, 의도한 대로 동작하지 않을 수 있다.  
+캐시가 되지 않은 곳에서는 다른 결과가 나올 수 있다는 것이다.  
+즉, 로컬에서의 빌드 결과와 다른 곳에서의 빌드 결과는 다를 수 있다.  
+
+`docker pull`역시 주의하여야 한다. 
+순서는 다음과 같다:
+1. 내 로컬에 Image가 있는가?
+2. 없다면 Registry에서 Pull해온다.
+
+`docker build --no-cache`명령은 캐시를 무시하고 새로 받아오게 해준다.  
+`docker build --pull` 명령은 base 이미지를 가져올 때 로컬의 이미지를 무시하고 새로 받아온다.   
+이 두 명령어는 예측가능한 파이프라인을 만들 수 있게 해주면서, 캐시 오류들도 없애준다.
+
+### 이전 예제에서의 문제
+
+Ubuntu이미지에 Docker Engine을 설치하는 예제에서, 쉘 스크립트 파일이 변경되면 쉘 스크립트 전체가 재실행 되어야 한다.  
+즉, 스크립트 파일 내에서 한 줄만 바뀌어도, 전체를 재실행해야 한다는 뜻이다.  
+캐시의 측면에서는 각 쉘 스크립트 명령 한줄마다 `RUN`을 하는 방식이 더 나을지도 모른다.  
+
+### 캐시와 ARG
+아래의 Dockerfile을 보자:
+```Dockerfile
+FROM __
+ARG ITMES=__
+RUN apt-get upgrade
+RUN apt-get install $(ITEMS)
+```
+
+`RUN apt-get upgrade`의 Parent Layer는 `FROM`부분이다.  
+`ARG`는 레이어를 남기지 않고, 캐시에도 영향을 주지 않는다.  
+즉, 이 예제에서는 `ARG ITEMS`가 바뀌더라도, `RUN apt-get upgrade`까지는 캐시가 된다는 것이다.
