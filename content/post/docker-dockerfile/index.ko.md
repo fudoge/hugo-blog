@@ -56,10 +56,14 @@ docker build . [-f <PATH_TO_FILE>
 | `ENTRYPOINT`   |  필수로 실행할 명령어 정의  |
 
 > **주의사항**
-> - `-f`를 통해 Dockerfile을 명시하지 않는 경우, 커맨드를 실행하는 워킹디렉터리에서 Dockerfile을 찾습니다
-> - `Dockerfile` 내 모든 상대 경로들은 build 시 입력된 Path(Context)를 기준으로 계산됩니다
-> - `cache`를 사용할 경우, 설치한 패키지 버전이 최신이 아닐 수 있습니다
+> - `-f`를 통해 Dockerfile을 명시하지 않는 경우, 커맨드를 실행하는 워킹디렉터리에서 Dockerfile을 찾는다  
+> - `Dockerfile` 내 모든 상대 경로들은 build 시 입력된 Path(Context)를 기준으로 계산된다  
+> - `cache`를 사용할 경우, 설치한 패키지 버전이 최신이 아닐 수 있다  
 > - `ADD`는 `COPY`보다 강력한 기능을 가지지만, 예측이 어려운 동작(압축 자동 해제 등)이 있어서 일반적으로는 `COPY`가 권장된다!   
+> - `RUN`에서 별도의 입력이 필요한 경우, 이는 오류로 간주되고 빌드를 종료한다.  
+> 즉, `apt install`등의 명령을 쓸 때에는 `-y`플래그를 꼭 넣어주어야 함  
+> - `EXPOSE`가 별 의미없는 듯 보이지만, `docker run`명령에서 `-P`를 이용하면 자동으로 포트포워딩이 진행되어서, 약간의 자동화의 의미를 가지긴 한다.  
+> 물론, 직접 명시하는 것이 더 명확하다.  
 
 > **RUN vs CMD vs ENRTYPOINT**  
 > `RUN`: 이미지를 빌드하는 과정에서 실행(필요한 Package 설치 등)  

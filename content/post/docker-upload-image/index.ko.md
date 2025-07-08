@@ -1,6 +1,6 @@
 ---
-title: "Docker에서 이미지 업로드하기"
-description: Docker에서 이미지를 업로드하는 법
+title: "Docker 이미지 업로드하기"
+description: Docker CLI에서 이미지를 업로드하는 법
 date: 2025-07-08T21:40:04+09:00
 image: "docker-logo.png"
 math: true
