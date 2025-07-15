@@ -8,6 +8,12 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Docker
+    - Container
+categories:
+    - Docker
 ---
 
 ## 📎 Anchor & Alias

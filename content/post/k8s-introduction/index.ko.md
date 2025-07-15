@@ -8,6 +8,12 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Kubernetes
+    - Container
+categories:
+    - Kubernetes
 ---
 
 ## ☸️ 쿠버네티스란?

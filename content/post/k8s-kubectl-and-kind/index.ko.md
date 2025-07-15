@@ -1,6 +1,6 @@
 ---
-title: "쿠버네티스 기본 제어 가이드: kubectl, kubectx, kubens"
-description: "kubectl 기본적인 명령어 사용법"
+title: "로컬 쿠버네티스 구성 및 쿠버네티스 기본 제어 가이드: kubectl, kubectx, kubens"
+description: "kind기반의 로컬 클러스터 생성 및 kubectl 기본적인 명령어 사용법"
 date: 2025-07-15T00:28:57+09:00
 image: k8s-logo.webp
 math: 
@@ -8,6 +8,12 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Kubernetes
+    - Container
+categories:
+    - Kubernetes
 ---
 
 `kubectl`은 kube-apiserver에 api 요청을 전송하기 위한 클라이언트 프로그램이다.  
