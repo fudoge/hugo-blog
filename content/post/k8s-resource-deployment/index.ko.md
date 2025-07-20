@@ -7,7 +7,7 @@ math:
 license: 
 hidden: false
 comments: true
-draft: true
+draft: false
 
 tags:
     - Kubernetes
@@ -36,6 +36,9 @@ Deployment에 대해 더 알아보기 전에, 배포 전략에 어떤 것들이 
 
 ### Recreate
 모든 Pod들을 내리고, 새로운 버전의 Pod들을 일괄적으로 여는 전략이다.  
+![Recreating-1](recreating-1.png)
+![Recreating-2](recreating-2.png)
+![Recreating-3](recreating-3.png)
 
 **장점:**
 - 설정이 단순
@@ -46,10 +49,16 @@ Deployment에 대해 더 알아보기 전에, 배포 전략에 어떤 것들이 
 ### Ramped
 Incremental 또는 Rolling Update라고도 불린다.  
 순차적으로 Pod들을 교체한다. 
+![Rolling-1](rolling-1.png)
+![Rolling-2](rolling-2.png)
+![Rolling-3](rolling-3.png)
+![Rolling-4](rolling-4.png)
 - `maxSurge`: 최대 몇 개의 Pod들이 replicas보다 더 추가가능한가
 - `maxUnavailable`: 최대 몇 개까지 서비스에서 제외해도 되는다
 - 즉, 동시에 재가동될 수 있는 개수는 `maxSurge + maxUnavailable`개이다. 
 - `Sticky Session`으로 버전간 돌아다니지 않도록 조정해야 한다.
+![Rolling Params Example](rolling_example.png)
+
 
 **장점:**
 - 설정 및 사용이 쉬움
@@ -62,6 +71,8 @@ Incremental 또는 Rolling Update라고도 불린다.
 
 
 ### Blue/Green
+![Bluegreen-1](bluegreen-1.png)
+![Bluegreen-1](bluegreen-2.png)
 새 버전으로 똑같은 양으로 띄워서 한 번에 전환시킨다.  
 운영 환경이나 개발 환경이 거의 동일한 경우, 빠른 전환이 가능하다.  
 또는, 서비스 관계가 복잡한 경우, 사용에 용이하다.  
@@ -77,6 +88,7 @@ Incremental 또는 Rolling Update라고도 불린다.
 
 ### Canary
 조금씩만 전환하여 안전하다는 판단이 들면, 크게 전환시킨다.  
+![Canary](canary.png)
 
 **장점:**
 - 일부 사용자를 위해 출시된 버전을 사용할 경우
@@ -92,6 +104,7 @@ Incremental 또는 Rolling Update라고도 불린다.
 ### A/B Testing
 지역, 언어, 회원정보, 버전, 헤더, 쿼리 파라미터 등의 정보를 기반으로 트래픽을 분류한다.  
 즉, 사용자별로 차이를 두어 서비스한다.  
+![A/B Testing](a_b_testing.png)
 
 **장점:**
 - 여러 버전의 어플리케이을 동시에 서비스 가능 
@@ -104,6 +117,7 @@ Incremental 또는 Rolling Update라고도 불린다.
 
 
 ### Shadow
+![Shadow Deployment](shadow.png)
 Mirror 또는 Dark라고도 불린다.
 임시 버전도 동일한 요청을 같이 복사해서 받는다.  
 
