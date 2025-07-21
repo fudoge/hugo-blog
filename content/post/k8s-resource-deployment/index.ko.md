@@ -16,7 +16,7 @@ categories:
     - Kubernetes
 ---
 
-## Deployment
+## 🚀 Deployment
 **Deployment** 는 Pod 및 ReplicaSet에 대한 **선언적 업데이트**를 지원하며, 그 배포에 대한 세분화된 기능을 제공하는 쿠버네티스 오브젝트이다.  
 Deployment에 상태를 선언하면, 그 상태를 따라가기 위해 Deployment Controller가 동작하여 상태를 맞춘다.  
 
@@ -31,7 +31,8 @@ Deployment
    ㄴ Pod
 ```
 
-## 배포 전략
+---
+## ♟️ 배포 전략
 Deployment에 대해 더 알아보기 전에, 배포 전략에 어떤 것들이 있는지에 대해 알아본다.
 
 ### Recreate
@@ -140,7 +141,8 @@ Mirror 또는 Dark라고도 불린다.
 - `canary`, `A/B Testing`, `shadow`는 모두 `Istio`와 같은 추가적인 컴포넌트가 필요하다. 
 
 
-## Deployment 사용해보기
+---
+## 🏋️ Deployment 사용해보기
 여기서는 기본적인 `recreate`와 `rolling update`를 실습해본다.
 
 ### 기본 Deployment
@@ -297,7 +299,8 @@ spec:
 
 
 
-## 마무리
+---
+## 📚 마무리
 - 다양한 배포 전략이 있으니, 때와 상황에 맞게 잘 사용해야 한다.  
 - K8s에서는 기본적으로 `Recreate`와 `RollingUpdate`를 지원한다. 기본은 `RollingUpdate`이다.  
 - `kubectl rollout`명령어로 스케일링 명령을 사용 가능하다.  
