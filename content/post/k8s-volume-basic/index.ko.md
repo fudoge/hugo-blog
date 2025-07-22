@@ -71,15 +71,15 @@ Node의 파일시스템에 직접 데이터를 저장한다.
 
 
 ---
-## ✋ PersistentVolume & PersistenVolumeClaim
+## ✋ PersistentVolume & PersistentVolumeClaim
 ![PV - PVC](k8s-vol-pv-pvc.png)
 
 둘은 마치 하드디스크 공급자 하드디스크 소비자의 관계와 같다.   
 약어는 각각 `pv`, `pvc`이다.
 
 
-### PersistenVolumeClaim
-**PersistenVolumeClaim** 은 네임스페이스 종속 자원으로, 사용자가 스토리지를 요청하는 객체이다.  
+### PersistentVolumeClaim
+**PersistentVolumeClaim** 은 네임스페이스 종속 자원으로, 사용자가 스토리지를 요청하는 객체이다.  
 즉, PV에 대한 요청 권리라고 보면 된다.  
 
 ### PersistentVolume
@@ -318,7 +318,7 @@ spec:
 ConfitMap과 Secret은 **Key-Value** 쌍으로 데이터를 저장하는 특수 볼륨이다.   
 Namespace에 종속되어 있다.  
 `kubectl edit` 등으로 동적인 변경이 가능하지만, 실제 반영은 이야기가 다르다.  
-환경 변수, Arg등으로 주입한 경우는 Pod재시작 이후에 가능하고, 볼륨 마운트는 즉각 반응한다.  
+환경 변수, Arg등으로 주입한 경우는 Pod재시작 이후에 적용되고, 볼륨 마운트는 즉각 적용된다.
 
 ### 번외: Arg를 통해 컨테이너에 Arg 주입
 ```yaml
@@ -513,7 +513,7 @@ spec:
 ---
 ## 📚 요약
 - 쿠버네티스에서는 `PersistentVolume`을 이용하여 데이터를 영속적으로 보관하고, 실제 저장소는 클러스터 외부에 있다.  
-- `PersistenVolumeClaim`으로 `PV`에 접근할 수 있다.  
+- `PersistentVolumeClaim`으로 `PV`에 접근할 수 있다.  
 - `StorageClass`를 이용하면 `PV`를 만들지 않고 `PVC`의 요구에 따라 유연하게 `PV`가 생성된다.  
 - `ConfigMap`은 환경변수 등의 주입에 주로 사용되고, 환경변수로도, 파일로도 이용 가능하다.  
 - `Secret`은 `ConfigMap`과 사용이 거의 유사하지만, 민감한 정보에 사용된다.
