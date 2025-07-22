@@ -135,10 +135,10 @@ spec:
 
 ### LoadBalancer
 내부로는 `ClusterIP`를, 외부에는 로드밸런서를 설치한다.   
-사용중인 클라우드 서비스에 따른 로드밸런서(aws의 경우 elb) 인스턴스가 생성된다.  
+사용중인 클라우드 서비스에 따른 로드밸런서(aws의 경우 nlb) 인스턴스가 생성된다.  
 Cloud Controller들 중에서 LB Controller가 존재하며, 이것이 클라우드에서 인스턴스를 생성하도록 하는 것이다.  
 기본적으로 `NodePort`를 추상화한 서비스이다.  
-![LB with NodePort](k8s-nw-lb-np.png)
+![LB with NodePort](k8s-lb.png)
 
 그러나, 클라우드의 LB의 경우, 클라우드 자체의 CNI를 사용하여, POD ip로 직접 라우팅시킬 수 있다.  
 (일부 클라우드 서비스에서만 지원, aws에서는 AWS VPC CNI가 제공되지만, GKE, AKS는 설정이 더 복잡함, 이외 클라우드 서비스는 매우 제한적)  
@@ -148,7 +148,7 @@ Cloud Controller들 중에서 LB Controller가 존재하며, 이것이 클라우
 
 ![LB with aws vpc cni](k8s-nw-aws-vpc-cni.png)
 
-온프레미스에서는 `MetalLB`등을 사용한다.
+온프레미스에서는 `MetalLB`등을 사용한다.  
 온프레미스에서는 `NodePort`를 추상화해서 사용한다고 보면 되지만, 고급 CNI설정 시, Pod로 직접라우팅이 가능하다.  
 
 ```yaml
@@ -157,7 +157,7 @@ spec:
 ```
 
 
-AWS의 elb를 쓰기 위해서는, `Service`의 `annotation`에 아래의 주석들이 있어야 한다:
+AWS의 nlb를 쓰기 위해서는, `Service`의 `annotation`에 아래의 주석들이 있어야 한다:
 파드 수준의 로드밸런싱을 지원할 수 있다.  
 
 ```yaml
@@ -183,7 +183,7 @@ Ingress 자체는 규칙을 정의할 뿐이며, **Ingress Controller**가 있�
 
 
 아래 예시는 EKS에서 `alb`가 Pod에 바로 트래픽을 전달해준다.  
-여기서는 Ingress로 단일의 ALB가 하나 생기고, 그 ALB는 AZ별로 ENi를 하나씩 가져서 직접 Pod에 트래픽을 보낼 수 있다.   
+여기서는 Ingress로 단일의 ALB가 하나 생기고, 그 ALB는 AZ별로 ENI를 하나씩 가져서 직접 Pod에 트래픽을 보낼 수 있다.   
 
 `nginx-ingress.yaml` 예시
 ```yaml
