@@ -7,10 +7,10 @@ math:
 license: 
 hidden: false
 comments: true
-draft: true
+draft: false
 ---
 
-## Statefulset이 사용되는 이유
+## 🗣️ Statefulset이 사용되는 이유
 웹, WAS등의 서비스들은 무상태(Stateless)의 서비스이다.  
 하나의 PV를 여럿이서 공유한다.  
 그러고 보통 공통으로 읽기만 하면 된다.  
@@ -21,82 +21,65 @@ draft: true
 즉, Stateful하다.  
 보통 분산 데이터베이스를 위해 사용되는 경우가 대부분이다.  
 
+---
+## 💜 StatefulSet
+![Deployment vs StatefulSet](k8s-deployment-vs-sts.png)
 
-## StatefulSet
 StatefulSet의 Pod들은 동일한 컨테이너 스펙을 가진다.  
 그러나, 각 Pod는 고유한 ID를 항상 가진다.  상태를 가지고, 각각의 PVC로 각각의 PV에 접근해야 하기 때문이다.  
 
+
+![Init StatefulSet - 1](k8s-initsts-1.png)
+![Init StatefulSet - 2](k8s-initsts-2.png)
 StatefulSet의 생성은 항상 작은 번호부터 순차적으로 생긴다.  롤링 업데이트도 작은 번호부터 순차적으로 이루어진다.  
 이렇게 되면, Pod - PVC - PV의 매칭에 편리하다.  
+
+![Delete StatefulSet - 1](k8s-deletests-1.png)
+![Delete StatefulSet - 2](k8s-deletests-2.png)
 제거될 때에는 거꾸로 제거된다.  
 분산 시스템의 경우, 보통 Write가 이루어지는 Master가 0번과 같이 낮은 번호를 가지는데, 낮은 번호부터 제거되면 새로운 대표자 선출이 계속되어 비효율적이기 때문이다.  
 대신, 높은 숫자부터 제거하면, 새로운 대표자 선출이 최소화될 수 있어 더 성능에 좋다.  
 
-만약 Pod가 죽고 재생성되면 어떻게 될까?  
+![Pod healed - 1](k8s-poddown-1.png)
+![Pod healed - 2](k8s-poddown-2.png)
+만약 Pod가 죽고 재생성되면 어떻게 될까?    
 동일한 Pod의 ID로 생성되기에, 이전에 생성된 PVC-PV와 다시 매칭될 수 있다.  
 
 
-## 예시: MySQL 복제 클러스터 구축
+---
+## 🏋️ StatefulSet 연습
 
-아래 예시는 1 Master + 2 Slaves의 구조를 가지는 예시이다.  
-실제로는 레플리카의 정보를 더 안전하게 주입할 필요가 있다.  
 
-**mysql-svc.yaml**
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysql
-spec:
-  clusterIP: None
-  selector:
-    app: mysql
-  ports:
-  - port: 3306
-```
-
-**mysql-sts.yaml**
+### StatefulSet 생성
+**nginx-sts.yaml**
 ```yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mysql
+  name: web
 spec:
-  serviceName: "db"
+  serviceName: "nginx"
   replicas: 3
   selector:
     matchLabels:
-      app: mysql
+      app: nginx
   template:
     metadata:
       labels:
-        app: mysql
+        app: nginx
     spec:
       containers:
-      - name: mysql
-        image: mysql:5.7
+      - name: nginx
+        image: nginx:1.21
         ports:
-        - containerPort: 3306
-          name: mysql
+        - containerPort: 80
+          name: web
         volumeMounts:
-        - name: mysql-data
-          mountPath: /var/lib/mysql
-        - name: init-script
-          mountPath: /docker-entrypoint-initdb.d/
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: password123
-        - name: MYSQL_REPLICATION_USER
-          value: repl
-        - name: MYSQL_REPLICATION_PASSWORD
-          value: replpass
-      volumes:
-        - name: init-script
-          configMap:
-            name: mysql-init
+        - name: www
+          mountPath: /usr/share/nginx/html
   volumeClaimTemplates:
   - metadata:
-      name: mysql-data
+      name: www
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: gp2
@@ -105,30 +88,41 @@ spec:
           storage: 1Gi
 ```
 
-**configmap.yaml**
+### Headless Service 생성
+**headless-nginx.yaml**
 ```yaml
 apiVersion: v1
-kind: ConfigMap
-metadata: 
-  name: mysql-init
-data: 
-  init-replication.sql: |
-    -- For Master Only
-    CREATE USER IF NOT EXISTS 'repl'@'%' IDENTIFIED BY `replpass`;
-    GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
-    FLUSH PRIVILEGES;
+kind: Service
+metadata:
+  name: nginx
+spec:
+  clusterIP: None
+  selector:
+    app: nginx
+  ports:
+  - port: 80
+    targetPort: 80
 ```
 
+### 데이터 지속성 확인
 
-아래의 sql문을 mysql-1, mysql-2에 접속해서 한 번씩만 실행해주자. 
+**각자 다른 페이지를 생성해주자.**
+```bash
+kubectl exec web-0 -- sh -c "echo 'Data from web-0 at $(date)' > /usr/share/nginx/html/index.html"
+kubectl exec web-1 -- sh -c "echo 'Data from web-1 at $(date)' > /usr/share/nginx/html/index.html"
+kubectl exec web-2 -- sh -c "echo 'Data from web-2 at $(date)' > /usr/share/nginx/html/index.html"
 
-```sql
-CHANGE MASTER TO
-  MASTER_HOST='mysql-0.mysql.default.svc.cluster.local',
-  MASTER_USER='repl',
-  MASTER_PASSWORD='replpass',
-  MASTER_AUTO_POSITION = 1;
-START SLAVE;
+kubectl exec web-0 -- cat /usr/share/nginx/html/index.html
+kubectl exec web-1 -- cat /usr/share/nginx/html/index.html
+kubectl exec web-2 -- cat /usr/share/nginx/html/index.html
 ```
 
+0번 파드를 제거해보자.
+```bash
+kubectl delete po web-0
+```
 
+이후, 다시 데이터를 확인해보자:
+```bash
+kubectl exec web-0 -- cat /usr/share/nginx/html/index.html
+```
