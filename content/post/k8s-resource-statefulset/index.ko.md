@@ -8,6 +8,12 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Kubernetes
+    - Container
+categories:
+    - Kubernetes
 ---
 
 ## 🗣️ Statefulset이 사용되는 이유
@@ -126,3 +132,11 @@ kubectl delete po web-0
 ```bash
 kubectl exec web-0 -- cat /usr/share/nginx/html/index.html
 ```
+
+---
+## 📚 마무리
+`StatefulSet`은 상태를 가진 Pod들을 관리하는 데 쓰이는 Stateful Deployment라고 할 수 있다.  
+보통 `PV`와 함께 쓰인다.  
+Deployment와는 달리, 작은번호부터 순차적으로 생성되고, 작은번호부터 롤링업데이트가 된다.  
+삭제 시에는 마스터를 최대한 늦게 죽이기 위해, 큰 번호부터 제거된다.  
+Pod가 고정된 고유번호화 함께 PVC-PV와 바인딩되기에, 죽고 다시 깨어나도 동일한 고유의 PV에 연결될 수 있고, 이름도 고유하며 재사용된다.  
