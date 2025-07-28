@@ -37,12 +37,12 @@ StatefulSet의 Pod들은 동일한 컨테이너 스펙을 가진다.
 
 ![Init StatefulSet - 1](k8s-initsts-1.png)
 ![Init StatefulSet - 2](k8s-initsts-2.png)
-StatefulSet의 생성은 항상 **작은 번호부터 순차적으로** 생긴다.  롤링 업데이트도 **작은 번호부터 순차적** 으로 이루어진다.  
+StatefulSet의 생성은 항상 **작은 번호부터 순차적으로** 생긴다.  
 이렇게 되면, Pod - PVC - PV의 매칭에 편리하다.  
 
 ![Delete StatefulSet - 1](k8s-deletests-1.png)
 ![Delete StatefulSet - 2](k8s-deletests-2.png)
-**제거될 때에는 거꾸로 제거된다.**  
+**롤링 업데이트 및 제거될 때에는 거꾸로 제거된다.**  
 분산 시스템의 경우, 보통 Write가 이루어지는 Master가 0번과 같이 낮은 번호를 가지는데, 낮은 번호부터 제거되면 새로운 대표자 선출이 계속되어 비효율적이기 때문이다.  
 대신, 높은 숫자부터 제거하면, 새로운 **대표자 선출이 최소화** 될 수 있어 더 성능에 좋다.  
 
@@ -135,8 +135,8 @@ kubectl exec web-0 -- cat /usr/share/nginx/html/index.html
 
 ---
 ## 📚 마무리
-`StatefulSet`은 상태를 가진 Pod들을 관리하는 데 쓰이는 Stateful Deployment라고 할 수 있다.  
+- `StatefulSet`은 상태를 가진 Pod들을 관리하는 데 쓰이는 Stateful Deployment라고 할 수 있다.  
 보통 `PV`와 함께 쓰인다.  
-Deployment와는 달리, 작은번호부터 순차적으로 생성되고, 작은번호부터 롤링업데이트가 된다.  
-삭제 시에는 마스터를 최대한 늦게 죽이기 위해, 큰 번호부터 제거된다.  
-Pod가 고정된 고유번호화 함께 PVC-PV와 바인딩되기에, 죽고 다시 깨어나도 동일한 고유의 PV에 연결될 수 있고, 이름도 고유하며 재사용된다.  
+- Deployment와는 달리, 작은번호부터 순차적으로 생성된다.  
+- 롤링 업데이트 및 삭제 시에는 마스터를 최대한 늦게 죽이기 위해, 큰 번호부터 제거된다.  
+- Pod가 고정된 고유번호화 함께 PVC-PV와 바인딩되기에, 죽고 다시 깨어나도 동일한 고유의 PV에 연결될 수 있고, 이름도 고유하며 재사용된다.  
