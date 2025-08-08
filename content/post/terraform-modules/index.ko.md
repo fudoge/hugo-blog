@@ -8,6 +8,13 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags: 
+    - Terraform
+    - AWS
+
+categories:
+    - Terraform
 ---
 
 ## 🧱 모듈
