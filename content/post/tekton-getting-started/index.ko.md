@@ -8,6 +8,14 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags: 
+    - Kubernetes
+    - CI/CD
+    - Tekton
+
+categories:
+    - Tekton
 ---
 
 ---
