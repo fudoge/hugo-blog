@@ -182,7 +182,6 @@ Ingress 자체는 규칙을 정의할 뿐이며, **Ingress Controller**가 있�
 
 그러나, 일부 클라우드 서비스의 경우, 실제 Pod로 직접 라우팅한다.  특별한 CNI를 쓰면 가능하다.  
 ![Ingress with aws vpc cni](k8s-nw-ingress-aws-vpc-cni.png)
-소규모 온프레미스 인프라의 경우, Ingress + NodePort로 진입점을 만드는 경우도 있다.
 
 
 

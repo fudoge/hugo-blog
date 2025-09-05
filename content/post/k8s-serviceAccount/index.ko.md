@@ -1,6 +1,6 @@
 ---
 title: "Kubernetes: ServiceAccount"
-description: Non-human Account인 ServiceAccount에 대해 알아보자.
+description:  ServiceAccount에 대해 알아보자.
 date: 2025-08-17T21:18:44+09:00
 image: k8s-logo.webp
 math: true
