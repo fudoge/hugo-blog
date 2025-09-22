@@ -1,6 +1,6 @@
 ---
 title: "Cilium - 클러스터에 설치하기"
-description: 
+description: Cilium을 클러스터에 CNI로 설치해보자
 date: 2025-09-22T23:29:21+09:00
 image: cilium-logo.png
 math: 
