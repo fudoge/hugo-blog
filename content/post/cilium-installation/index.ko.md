@@ -8,6 +8,13 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Kubernetes
+    - Cilium
+
+categories:
+    - Cilium
 ---
 
 이번에는 Cilium을 쿠버네티스에 설치할 것이다.  
