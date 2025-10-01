@@ -90,7 +90,7 @@ API를 통해 명령의 실행 등을 자동화하여, 실패 시에 이전의 �
 ### Control Plane의 고가용성 구성
 `API-Server`는 `Load-Balancer`를 통해서 수평적 확장이 가능하다.  
 `etcd`는 분산형 **Key-Value** 저장소로, RAFT알고리즘을 통해 Master가 선정되고,  
-**Mater**에 쓰기 작업이 먼저 이뤄지면, 나머지 노드들에 복제되는 방식이다.  
+**Master**에 쓰기 작업이 먼저 이뤄지면, 나머지 노드들에 복제되는 방식이다.  
 CAP 중 CP 시스템으로, **Consistency**를 유지하고, **Partition tolerance**를 제공한다.
 - **Consistency** : 일관성을 유지한다.  
 - **Partition tolerance** : 네트워크 분할 발생 시에도 부분적으로 기능을 수행함을 말한다.  
