@@ -2,7 +2,7 @@
 title: "집에서 Vaultwarden으로 비밀번호 서버 운영하기 (w. TailScale VPN)"
 description: Self-host Vaultwarden서버 운영 인프라를 구축해보자
 date: 2025-11-01T13:37:44+09:00
-image: 
+image: tailscale-vw-server.drawio.svg
 math: 
 license: 
 hidden: false
@@ -21,9 +21,8 @@ categories:
 
 집에서 쓰는 맥미니에서 bitwraden의 경량버전인 vaultwarden을 운영해서 실제 개인 사용을 위한 패스워드 서버로 쓸 것이다.
 
-전체 아키텍처는 다음과 같다:
-![Architecture](tailscale-vw-server.png)
-
+전체 아키텍처는 다음과 같다:  
+![Architecture](<tailscale-vw-server.drawio.svg>)
 
 ---
 ## 🔒 Vaultwarden 시작하기
@@ -62,6 +61,7 @@ services:
 우선, 기본적인 vaultwarden서버 세팅이 완료되었다.  
 그러나, 우린 이 서버에 안전하게 접근해야 한다!  
 
+---
 ## 🌐 TailScale 세팅하기
 TailScale은 WireGuard 프로토콜을 기반으로 한 분산 VPN 서비스이다.  
 자세한 내용은 [이 게시글]({{< relref "post/how-tailscale-works" >}})에서 확인가능하다.
@@ -88,6 +88,7 @@ PING 100.87.71.24 (100.87.71.24): 56 data bytes
 round-trip min/avg/max/stddev = 5.851/46.612/98.555/40.796 ms
 ```
 
+---
 ## ✅ HTTPS 세팅하기
 이제 어디서나 홈서버와 내 다른 기기들은 서로 통신할 수 있게 되었다.  
 Vaultwarden은 외부 클라이언트로부터 SSL/TLS연결을 요구한다. 
@@ -585,6 +586,7 @@ Terraform을 쓸 때는, 다음과 같은 파일들을 추적하지 않는 것�
 backend.hcl
 ```
 
+---
 ## 🖥️ 모니터링
 
 ### node_exporter를 이용한 서버 자원 수집
@@ -771,6 +773,7 @@ ID에 아래의 숫자를 넣으면 된다:
 로그 수집 상태를 볼 수 있다.
 ![loki-promtail](loki-promtail.png)
 
+---
 ## 🫥 gitignore
 세부 데이터들은 추적하지 않는 것이 좋다
 ```gitignore
@@ -786,6 +789,7 @@ autobackup.sh
 rerollcert.sh
 ```
 
+---
 ## 🚀 실행하기
 아래의 셀 스크립트를 이용해서 mac이 잠자기 모드에 빠지지 않게 실행되도록 했다:
 ```bash
@@ -806,9 +810,10 @@ echo "🚀 Containers are up! Enjoy it!"
 echo -e "To stop: \033[31mkill ${CAFFEINATE_PID} && docker compose down \033[0m"
 ```
 
+---
 ## 🏁 향후 고려할 업그레이드 사항
 - 클라우드 백업 이중화: 최근 AWS 버지니아 북부 장애사건으로, 멀티클라우드의 중요성이 대두되고 있는데, 더 긴 주기로 한번씩 다른 클라우드 오브젝트 스토리지에 저장하는 것도 괜찮을 듯 하다.
-- macOS에서의 node-exporter 지원이 시원찮아서 다른 대안을 이용해볼까 싶다..
+- macOS에서의 node-exporter 지원이 시원찮아서 다른 대안을 이용해볼까 싶다..  예를 들면 influxDB + telegraf..
 - AlertManager 추가
 - Grafana Dashboard를 추가로 직접 구성
 - 로그 데이터를 클라우드로
