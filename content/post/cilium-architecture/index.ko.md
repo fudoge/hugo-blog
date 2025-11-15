@@ -1,25 +1,26 @@
 ---
 title: "Cilium의 내부 구조 및 동작"
 description: Cilium의 내부 구조와 동작에 대해 알아보자
-date: 2025-11-14T19:11:06+09:00
+date: 2025-09-30T19:11:06+09:00
 image: cilium-logo.png
 math: 
 license: 
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Kubernetes
+    - Cilium
+
+categories:
+    - Cilium
 ---
 
-  
-
 ![Cilium Architecture](cilium-architecture.png)
-
-  
-
 Cilium을 설치하면, 다양한 운영 컴포넌트들이 설치된다.
 
-  
-
+---
 ## 🧱 Cilium 구성요소
 
 ### Cilium Operator
@@ -104,6 +105,7 @@ Cilium Agent는 다른 클러스터의 etcd 프록시에 접속해서, 클러스
 이는 글로벌 서비스로 확장할 수 있게 해준다.
 
 
+---
 ## 📍 Endpoint
 
 Cilium은 애플리케이션 컨테이너에게 IP주소를 할당함으로써 네트워크에서 가용 가능하도록 한다.  
@@ -112,6 +114,7 @@ Cilium은 애플리케이션 컨테이너에게 IP주소를 할당함으로써 �
 Cilium은 Pod에게 1개의 Endpoint를 제공한다.  
 Endpoint는 Cilium의 기본 네트워크 단위이다.  
 
+---
 ## 🪪 Identity
 
 Cilium이 효율으로 동작하는 데에는 Identity가 중요한 역할을 한다.  

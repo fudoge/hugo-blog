@@ -1,17 +1,23 @@
 ---
 title: "Cilium NetworkPolicy - 네트워크에 규칙 적용하기"
 description: 
-date: 2025-11-14T19:26:13+09:00
+date: 2025-10-03T19:26:13+09:00
 image: cilium-logo.png
 math: 
 license: 
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Kubernetes
+    - Cilium
+
+categories:
+    - Cilium
 ---
 
-  
-
+---
 ## 🧑‍⚖️ 네트워크 정책의 종류
 
 네트워크 정책은 사용자가 클러스터 내에서 무슨 트래픽이 허용되는지 정하도록 한다.  
@@ -33,6 +39,7 @@ Cilium은 이 세 가지 정책을 동시에 지원한다.
 `networkpolicy.io`의 시각화 도구는 서로 다른 정책 정의가 미치는 영향을 보는 데 도움을 준다.
 
   
+---
 ## 📏 NetworkPolicy 리소스
 
 `NetworkPolicy` 자원은 IP주소 또는 포트 레벨에서의 트래픽 흐름을 제어하는 L3/L4 계층의 전통적인 쿠버네티스 자원이다.  
@@ -42,6 +49,7 @@ Cilium은 이 세 가지 정책을 동시에 지원한다.
 - L4 TCP 및 ICMP 포트에 대한 Ingress 및 Egress 정책
 
 
+---
 ## 📐 CiliumNetworkPolicy 리소스
 `CiliumNetworkingPolicy`는 표준 `NetworkPolicy`의 확장이다.
 다음의 기능들을 제공한다:
@@ -57,6 +65,7 @@ YAML만을 읽고, 어떤 트래픽이 허용되고 거부될지를 예측하는
 다행히도, [networkpolicy.io](http://networkpolicy.io)에서는 이러한 작업을 더 쉽게 도와준다.
 
 
+---
 ## ✍️ [Networkpolicy.io](http://Networkpolicy.io) Policy Editor
 NetworkPolicy.io의 policy editor는 L3 및 L4 네트워크 정책을 찾아보고 만드는 것에 대해 좋은 방법을 제공한다.  
 시각적인 자료를 보여주고, 정책을 고를 수 있게 해준다.  
@@ -79,6 +88,7 @@ Hubble flow를 업로드할수도 있고, Hubble이 무엇을 볼 수 있는지�
 주의할 점은, 아직 L7지원은 안된다는 것이다.
 
   
+---
 ## ✅ L7 CiliumNetworkPolicy이 가능한 것
 CiliumNetworkPolicy가 기존 정책과 다른 점은, L7 protocol을 이해하는 정책에 있다.
 Cilium에서는, HTTP, Kafka, DNS등의 L7지원이 가능하다.
@@ -88,6 +98,7 @@ L7 정책 룰의 속성은 Cilium의 여러 프로토콜에 대해 다른 속성
 
   
 
+---
 ## 🕸️ L7 HTTP 정책
 L7 HTTP 정책이 활성화되면, 해당 파드가 돌아가는 노드의 Cilium Agent는 local-only의 HTTP proxy service와 eBPF프로그램을 실행하여 패킷을 local HTTP proxy에서 포워드되도록 한다.    
 
@@ -150,6 +161,7 @@ L7규칙은 L4규칙에서 더 확장된 것 처럼 형상하고 있다.
 즉, L7규칙은 L4규칙에서 시작해서 붙여나가는 식이 좋다.
 
 
+---
 ## 🏃 실습: L4/L7 네트워크 정책
 
 ### 시나리오
@@ -435,7 +447,8 @@ X-wing은 L4정책으로 접근하지 못해서 HTTP 메시지도 못받고 타�
 
   
 
+---
 ## 📚 결론
-CiliumNetworkPolicy는 Pod간 통신에서 안전하게 접근제어를 하는 방식 중 하나이다.  
+`CiliumNetworkPolicy`는 Pod간 통신에서 안전하게 접근제어를 하는 방식 중 하나이다.  
 Pod들의 통신에서 전체 권한을 주기보다, CiliumNetworkPolicy를 통해서 최소 권한으로 유지하는 것이 좋다.  
 이렇게 최소 권한으로 유지하는 것은 서비스가 의도지 않게 동작하는 것을 막아주고, 보안에도 좋다.
