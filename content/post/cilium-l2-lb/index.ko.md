@@ -1,7 +1,7 @@
 ---
 title: "Cilium: L2 LoadBalancer를 노출해보자"
 description: Cilium에서 L2 Announcement를 이용하여 LoadBalancer를 꺼내보자.
-date: 2025-11-01T14:52:39+09:00
+date: 2025-11-02T14:52:39+09:00
 image: cilium-logo.png
 math: 
 license: 
