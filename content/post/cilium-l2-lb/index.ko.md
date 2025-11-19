@@ -65,6 +65,34 @@ spec:
   loadBalancerIPs: true
 ```
 
+
+아래와 같이 하면, failover도 지원된다.
+```yaml
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: local-l2
+spec:
+  nodeSelector:
+    matchLabels: # 다음의 label을 가지면 ok
+      l2candidate: "true"
+  interfaces: # 다음의 인터페이스를 가지면 ok
+    - enp1s0
+    - enp2s0
+    - enp3s0
+    - enp4s0
+    - enp5s0
+    - enp6s0
+  externalIPs: true
+  loadBalancerIPs: true
+```
+
+여러 노드에 `l2candidate=true` label을 붙여주면 된다.
+```bash
+kubectl label node worker1 l2candidate=true
+kubectl label node worker2 l2candidate=true
+```
+
 ---
 ## ✅ 테스트
 `test.yaml`
@@ -108,6 +136,11 @@ spec:
     protocol: TCP
     port: 80
 ---
+```
+
+`lease`리소스는 ARP 광고를 수행할 리더노드를 선출한다.
+```bash
+kubectl -n kube-system get lease | grep l2
 ```
 
 External-IP가 나온 것을 볼 수 있다.
