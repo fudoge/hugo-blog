@@ -114,7 +114,7 @@ Let’s Encrypt에 의해 인증서가 발급되는데, 실제 인터넷에 도�
 ### Caddy를 리버스 프록시로 사용하기
 Caddy는 고성능 리버스 프록시로, 간결한 설정 파일 구조를 가진다.  
 또한, 인증서 갱신도 Tailscale과 조합이 좋다.  
-단, 
+단, 컨테이너 환경에서는 tailscaled가 systemd에 의해 관리되지 않으므로, 별도 갱신 스크립트로 대체하였다.
 
 `docker-compose.yaml`의 `services`의 하위에 다음을 추가한다.
 ```yaml
