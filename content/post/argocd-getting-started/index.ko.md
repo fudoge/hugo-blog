@@ -1,5 +1,5 @@
 ---
-title: "Argocd 시작하기"
+title: "ArgoCD: 시작하기"
 description: GitOps 워크플로우를 구축하는 ArgoCD에 대해 알아보자
 date: 2025-11-06T11:15:27+09:00
 image: argocd-logo.png
