@@ -1,7 +1,7 @@
 ---
 title: "Argocd 시작하기"
 description: GitOps 워크플로우를 구축하는 ArgoCD에 대해 알아보자
-date: 2025-11-04T11:15:27+09:00
+date: 2025-11-06T11:15:27+09:00
 image: argocd-logo.png
 math: true
 license: 
@@ -43,7 +43,7 @@ Web UI, CLI, CI/CD시스템으로부터 상호작용하여, 애플리케이션 �
 지속적으로 클러스터의 상태와 레포지토리에서 쓰인 desired state와 비교한다.  
 즉, Kubernetes API와 상호작용하며 실제 작업을 맡는 역할을 한다.
 
-## 클러스터에 ArgoCD 설치
+## 🚀 클러스터에 ArgoCD 설치
 
 ### 명령어를 통한 설치
 
@@ -58,7 +58,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 ### ArgoCD CLI 설치
 [ArgoCD Installation](https://argo-cd.readthedocs.io/en/stable/cli_installation/)을 참고한다.
 
-## ArgoCD Dashboard에 접속
+## 🖥️ ArgoCD Dashboard에 접속
 
 Port-forward, NodePort, LoadBalancer, Ingress, Gateway API등을 이용할 수 있다.
 
