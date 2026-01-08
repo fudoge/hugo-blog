@@ -10,7 +10,7 @@ comments: true
 draft: false
 
 tags:
-    - ArgocD
+    - ArgoCD
     - Kubernetes
     - GitOps
 categories:
@@ -136,9 +136,13 @@ spec:
     server: https://kubernetes.default.svc
     namespace: triton-dta
   syncPolicy:
+    automated:
+      enabled: true
     syncOptions:
       - CreateNamespace=true
 ```
+
+`spec.syncPolicy.automated.enabled`를 `true`로 두면, 자동으로 Sync된다.
 
 ## Application 적용해보기
 레포지토리를 커밋 및 푸시해주자. 그 뒤, 이 애플리케이션을 적용하여 만들어보자.

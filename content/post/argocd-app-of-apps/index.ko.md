@@ -10,7 +10,7 @@ comments: true
 draft: false
 
 tags:
-    - ArgocD
+    - ArgoCD
     - Kubernetes
     - GitOps
 categories:
