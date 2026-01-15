@@ -5,36 +5,29 @@
 $codeblock-max-height: 25em;
 
 .article-content .highlight {
+  padding: 30px 1rem 0.75rem;
   max-width: 95%;
-  /* 본문보다 살짝 작게 */
   margin: 1.5rem auto;
-  /* 중앙 정렬 */
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-  /* 조금 더 깊은 입체감 */
   border-radius: 12px;
-
-  /* 스크롤 제어: 여기서 한 번에 관리 */
   max-height: $codeblock-max-height;
   overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  position: relative;
+  position: relative; // 버튼 위치 기준점
 }
 
-/* 내부 코드 패딩 및 폰트 */
+/* 중요: 코드가 버튼에 가려지지 않게 오른쪽 패딩 추가 */
 .article-content pre {
-  padding: 0.5rem !important;
-  /* 여백을 좀 더 줌 */
+  padding: 0 !important;
+  padding-right: 3.5rem !important; /* ⬅️ 버튼이 들어갈 공간 확보 */
   line-height: 1.6;
   font-size: 14px;
   font-family: var(--code-font-family);
   margin: 0;
-  /* pre 자체 마진 제거 */
   overflow: visible !important;
-  /* 중복 스크롤 방지 */
 }
 
 // =============================
-// 2. 가독성 및 기능 설정 (Lucas 블로그 팁 반영)
+// 2. 가독성 및 기능 설정
 // =============================
 
 /* 줄 번호 및 코드 테이블 최적화 */
@@ -42,6 +35,7 @@ $codeblock-max-height: 25em;
   display: inline-table;
   min-width: max-content;
   border-spacing: 0;
+  margin-left: 0.25rem;
 }
 
 /* 줄 바꿈 방지 (가로 스크롤 활성화) */
@@ -53,6 +47,8 @@ $codeblock-max-height: 25em;
 .lntd:first-child {
   user-select: none;
   /* 줄 번호 선택 방지 */
+  padding-right: 0.75rem;
+  opacity: 0.6;   // 줄 번호 살짝 연하게
 }
 
 // =============================
@@ -74,8 +70,61 @@ $codeblock-max-height: 25em;
 }
 
 // =============================
-// 4. 여기에 Chroma 테마 CSS를 붙여넣으세요!
+// 4. Copy 버튼 디자인 (Modernize)
 // =============================
-/* `hugo gen chromastyles --style=dracula`로 뽑은 내용을 
-   여기에 붙여넣으면 색상이 완전히 오버라이드 돼.
-*/
+
+button.copyCodeButton {
+  position: absolute;
+  top: 8px;      /* 상단에서 적당히 띄움 */
+  right: 10px;   /* 우측에서 적당히 띄움 */
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 6px;
+  
+  /* 디자인 포인트: 살짝 투명한 유리 느낌 */
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1); 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px); /* 배경 살짝 흐리게 */
+  
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+/* 호버 시 버튼 효과 */
+.highlight:hover button.copyCodeButton {
+  opacity: 1;
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 클릭했을 때 살짝 눌리는 느낌 */
+button.copyCodeButton:active {
+  transform: scale(0.95);
+}
+
+
+// =============================
+// 5. MacOS style button
+// =============================
+
+/* 가짜 맥 스타일 버튼 추가 */
+.article-content .highlight::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ff5f56;
+    box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+    z-index: 1;
+}

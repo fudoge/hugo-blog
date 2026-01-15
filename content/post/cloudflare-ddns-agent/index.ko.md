@@ -19,7 +19,7 @@ categories:
 
 홈서버의 IP는 고정으로 가지기에 매우 힘들기에, DDNS를 세팅해줘야 한다.  
 현재 Cloudflare에서 도메인을 구매하여 DNS서비스를 이용하고 있는데,  
-[Cloudflare에서의 DDNS 구축 설명](https://developers.cloudflare.com/dns/manage-dns-records/how-to/managing-dynamic-ip-addresses/?_gl=1*136xy6p*_gcl_au*MTExOTI5NzA0Ni4xNzY1NTQyODIy*_ga*OTQ3YzNhMzMtNjA0Ny00ODI1LTlhYTQtYTFhN2MzYmQxY2Mz*_ga_SQCRB0TXZW*czE3Njg0Nzk0ODUkbzckZzEkdDE3Njg0Nzk0ODgkajU3JGwwJGgwJGRYZE5TeDN5dkpTeDhIRGZyN0kyaEJuN3lYRzhpLXVadjZB)을 보면, Cloudflare API를 통해 자체개발하거나, [DDClient](https://github.com/ddclient/ddclient)를 이용하라고 한다.
+[Cloudflare에서의 DDNS 구축 설명](https://developers.cloudflare.com/dns/manage-dns-records/how-to/managing-dynamic-ip-addresses/?_gl=1*136xy6p*_gcl_au*MTExOTI5NzA0Ni4xNzY1NTQyODIy*_ga*OTQ3YzNhMzMtNjA0Ny00ODI1LTlhYTQtYTFhN2MzYmQxY2Mz*_ga_SQCRB0TXZW*czE3Njg0Nzk0ODUkbzckZzEkdDE3Njg0Nzk0ODgkajU3JGwwJGgwJGRYZE5TeDN5dkpTeDhIRGZyN0kyaEJuN3lYRzhpLXVadjZB)에서는 Cloudflare API를 통해 자체개발하거나, [DDClient](https://github.com/ddclient/ddclient)를 이용하라고 한다.
 
 직접 Cloudflare API를 Go 언어를 통해서 개발해보려고 한다.
 
