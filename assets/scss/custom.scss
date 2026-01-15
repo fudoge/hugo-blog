@@ -5,9 +5,9 @@
 $codeblock-max-height: 25em;
 
 .article-content .highlight {
-  padding: 30px 1rem 0.75rem;
+  padding: 30px 1.25rem 0.75rem 0.9rem;
   max-width: 95%;
-  margin: 1.5rem auto;
+  margin: 1rem auto;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   max-height: $codeblock-max-height;
@@ -18,7 +18,6 @@ $codeblock-max-height: 25em;
 /* 중요: 코드가 버튼에 가려지지 않게 오른쪽 패딩 추가 */
 .article-content pre {
   padding: 0 !important;
-  padding-right: 3.5rem !important; /* ⬅️ 버튼이 들어갈 공간 확보 */
   line-height: 1.6;
   font-size: 14px;
   font-family: var(--code-font-family);
@@ -70,46 +69,52 @@ $codeblock-max-height: 25em;
 }
 
 // =============================
-// 4. Copy 버튼 디자인 (Modernize)
+// 4. Copy 버튼 디자인 (테마 대응)
 // =============================
 
 button.copyCodeButton {
-  position: absolute;
-  top: 8px;      /* 상단에서 적당히 띄움 */
-  right: 10px;   /* 우측에서 적당히 띄움 */
-  padding: 5px 10px;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
-  border-radius: 6px;
-  
-  /* 디자인 포인트: 살짝 투명한 유리 느낌 */
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.1); 
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px); /* 배경 살짝 흐리게 */
-  
-  cursor: pointer;
-  opacity: 0;
-  transform: translateY(-2px);
-  transition: all 0.2s ease;
-  z-index: 10;
+    position: absolute;
+    top: 50%;               /* 세로 중앙 정렬 준비 */
+    transform: translateY(-50%) translateY(-2px); /* 중앙 정렬 + 살짝 띄움 */
+    right: 12px;
+    
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+
+    // [기본: 라이트 모드 스타일]
+    color: rgba(0, 0, 0, 0.5); 
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(8px);
+
+    // [다크 모드 스타일 오버라이드]
+    [data-scheme="dark"] & {
+        color: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 }
 
-/* 호버 시 버튼 효과 */
+/* 호버 시 스타일 */
 .highlight:hover button.copyCodeButton {
-  opacity: 1;
-  transform: translateY(0);
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
+    opacity: 1;
+    transform: translateY(-50%) translateY(0); /* 제자리로 */
+    
+    background: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.8);
 
-/* 클릭했을 때 살짝 눌리는 느낌 */
-button.copyCodeButton:active {
-  transform: scale(0.95);
+    [data-scheme="dark"] & {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+    }
 }
-
 
 // =============================
 // 5. MacOS style button
