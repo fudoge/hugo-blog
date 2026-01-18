@@ -1,6 +1,6 @@
 ---
 title: "Triton Inference Server: Model Repository"
-description: 
+description: 모델 저장소에 대한 설정들을 알아보자.
 date: 2026-01-04T15:04:40+09:00
 image: tritonserver-logo.png
 math: 
