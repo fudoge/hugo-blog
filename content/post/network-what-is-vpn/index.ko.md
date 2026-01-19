@@ -1,21 +1,20 @@
 ---
 title: "VPN(Virtual Private Network)"
 slug: network-what-is-vpn
-description: 
+description: VPN에 대해 알아보자
 date: 2025-06-26T23:21:13+09:00
 image: 
 math: 
 license: 
 hidden: false
 comments: true
-draft: false
-private: true
-build:
-    list: never
-    render: always
-sitemap:
-    disable: true
+draft: true
 
+tags:
+    - Networking
+    - Cisco
+categories:
+    - Networking
 ---
 
 ## VPN이란

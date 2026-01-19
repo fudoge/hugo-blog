@@ -1,20 +1,19 @@
 ---
 title: "NAT(Network Address Translation)"
 slug: "network-what-is-NAT"
-description: What is NAT?
+description: NAT에 대해 알아보자
 date: 2025-06-26T00:39:51+09:00
 image: 
 math: true
 hidden: false
 comments: true
-draft: false
-private: true
-build:
-    list: never
-    render: always
-sitemap:
-    disable: true
+draft: true
 
+tags:
+    - Networking
+    - Cisco
+categories:
+    - Networking
 ---
 
 **NAT(Network Address Translation)** 은 RFC 1631에 정의된 기술로, IP Header의 주소를 다른 주소로 바꾸는 기술이다.  

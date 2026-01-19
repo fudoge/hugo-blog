@@ -1,20 +1,19 @@
 ---
 title: "ACL(Access Control List란)"
 slug: "network-what-is-ACL"
-description: What is ACL
+description: ACL에 대해 알아보자
 date: 2025-06-25T23:29:36+09:00
 image:
 math: true
 hidden: false
 comments: true
-draft: false
-private: true
-build:
-    list: never
-    render: always
-sitemap:
-    disable: true
+draft: true
 
+tags:
+    - Networking
+    - Cisco
+categories:
+    - Networking
 ---
 
 Router는 **ACL(Access-Control List)** 를 사용하여 트래픽을 필터링하거나, 식별한 후, 암호화 및 변환(NAT), 그리고 QoS(Quality of Service) 작업을 수행할 수 있다.  
