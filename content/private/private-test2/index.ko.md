@@ -15,8 +15,11 @@ categories:
 tags:
     - privateTag
 
-_build:
-    list: false
+build:
+    list: never
+    render: always
+sitemap:
+    disable: true
 ---
 
 ## 비밀글 테스트 22!
