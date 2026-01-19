@@ -13,8 +13,13 @@ categories:
     - privateCategory
 tags:
     - privateTag
-_build:
-    list: false
+
+build:
+    list: never
+    render: always
+sitemap:
+    disable: true
+
 ---
 
 ## Test Private 

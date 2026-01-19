@@ -10,8 +10,12 @@ hidden: false
 comments: true
 draft: false
 private: true
-_build:
-    list: false
+build:
+    list: never
+    render: always
+sitemap:
+    disable: true
+
 ---
 
 ## VPN이란
