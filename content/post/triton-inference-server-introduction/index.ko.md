@@ -93,12 +93,12 @@ spec:
   template:
     metadata:
       annotations:
-        kubectl.kubernetes.io/default-container: triton-dta-inference-server
+        kubectl.kubernetes.io/default-container: triton-inference-server
       labels:
         app: triton-inference-server
     spec:
       containers:
-        - name: triton-dta-inference-server
+        - name: triton-inference-server
           image: nvcr.io/nvidia/tritonserver:25.12-py3 # YY-MM
           imagePullPolicy: IfNotPresent
           args:
