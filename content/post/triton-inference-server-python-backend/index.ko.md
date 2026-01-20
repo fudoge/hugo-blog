@@ -314,6 +314,56 @@ models
     `-- triton_python_backend_stub
 ```
 
+### 커스텀 stub만들기 예시
+```bash
+# 컨테이너 안에서 
+# 패키지 업데이트
+apt update && apt install -y rapidjson-dev libarchive-dev
+
+# Miniconda 설치
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sudo bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
+export PATH="/opt/miniconda/bin:$PATH"
+
+# TOS 승인
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+# conda 환경 초기화
+conda init
+source ~/.bashrc
+
+# conda 환경 생성
+conda create -n py38 python=3.8 -y
+conda activate py38
+pip install cmake==3.31.10
+
+# Triton Python Backend 레포지토리 클론 및 빌드 작업 경로로 디렉토리 이동
+git clone https://github.com/triton-inference-server/python_backend -b r25.09 # 자신에게 맞는 버전의 브랜치를 쓸 것.
+cd python_backend
+mkdir build && cd build
+
+# 빌드
+# GPU를 쓰지 않는다면, `-DTRITON_ENABLE_GPU=OFF`로 할 것.
+# 여기서도 Triton 버전을 알맞게 표시할 것
+cmake -DTRITON_ENABLE_GPU=ON \
+ -DTRITON_BACKEND_REPO_TAG=r25.09 \
+ -DTRITON_COMMON_REPO_TAG=r25.09 \
+ -DTRITON_CORE_REPO_TAG=r25.09 \
+ -DCMAKE_INSTALL_PREFIX:PATH=$(pwd)/install ..
+
+make triton-python-backend-stub
+
+# libpython3.8.so.1.0을 링크하는지 확인
+ldd triton_python_backend_stub | grep python
+
+# 빌드된 아티팩트 이동
+cp triton_python_backend_stub /workspaces/triton-devcontainer/model_repository/add_one/triton_python_backend_stub
+```
+
+`ldd`로 링크를 확인하면, 아래와 같다:
+![Check with ldd](custom-stub.png)
+
 ### Custom 실행 환경 만들기
 만약 필요한 의존성을 담고 싶다면, 커스텀 실행 환경을 만들면 된다.  
 Python backend는 `conda-pack`을 지원한다.
@@ -516,55 +566,8 @@ USER ${USERNAME}
 이제, DevContainer에서 작업할 수 있다.   
 그러나, LSP에서 Python backend utils를 인식하지는 못하는 듯하다.  
 
-### 커스텀 stub만들기
-아래 명령들을 Devcontainer 안에서 실행한다.
-```bash
-# 패키지 업데이트
-apt update && apt install -y rapidjson-dev libarchive-dev
+나중에 DevContainer에서 빠져나올때는 명령 팔레트에서 Reopen하되, Container말고 기존의 로컬 옵션을 이용한다.  
 
-# Miniconda 설치
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-sudo bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
-export PATH="/opt/miniconda/bin:$PATH"
-
-# TOS 승인
-conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
-conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
-
-# conda 환경 초기화
-conda init
-source ~/.bashrc
-
-# conda 환경 생성
-conda create -n py38 python=3.8 -y
-conda activate py38
-pip install cmake==3.31.10
-
-# Triton Python Backend 레포지토리 클론 및 빌드 작업 경로로 디렉토리 이동
-git clone https://github.com/triton-inference-server/python_backend -b r25.09 # 자신에게 맞는 버전의 브랜치를 쓸 것.
-cd python_backend
-mkdir build && cd build
-
-# 빌드
-# GPU를 쓰지 않는다면, `-DTRITON_ENABLE_GPU=OFF`로 할 것.
-# 여기서도 Triton 버전을 알맞게 표시할 것
-cmake -DTRITON_ENABLE_GPU=ON \
- -DTRITON_BACKEND_REPO_TAG=r25.09 \
- -DTRITON_COMMON_REPO_TAG=r25.09 \
- -DTRITON_CORE_REPO_TAG=r25.09 \
- -DCMAKE_INSTALL_PREFIX:PATH=$(pwd)/install ..
-
-make triton-python-backend-stub
-
-# libpython3.8.so.1.0을 링크하는지 확인
-ldd triton_python_backend_stub | grep python
-
-# 빌드된 아티팩트 이동
-cp triton_python_backend_stub /workspaces/triton-devcontainer/model_repository/add_one/triton_python_backend_stub
-```
-
-`ldd`로 링크를 확인하면, 아래와 같다:
-![Check with ldd](custom-stub.png)
 
 ### `conda pack`으로 필요한 의존성 패킹하기
 
@@ -657,14 +660,12 @@ parameters: {
 
 ```
 
-### Devcontainer 빠져나오기
-명령 팔레트에서 Reopen하되, Container말고 기존의 로컬 옵션을 이용한다.  
 
 ### 테스트 및 요청 날려보기
 
 `model_repository`를 볼륨으로 마운트해서, 서버를 띄워보자.
 ```bash
-docker run --rm -p8000:8000 -p8001:8001 -p8002:8002 -v ./model_repository:/models nvcr.io/nvidia/tritonserver:25.09-py3 tritonserver --model-repository=/models # 태그 알맞게 작성!
+docker run --rm -p 8000:8000 -p 8001:8001 -p 8002:8002 -v ./model_repository:/models nvcr.io/nvidia/tritonserver:25.09-py3 tritonserver --model-repository=/models # 태그 알맞게 작성!
 ```
 
 Curl을 이용해서 간단히 요청을 날려보자.  
