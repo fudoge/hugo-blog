@@ -69,3 +69,89 @@ model_repository
 ```bash
 docker run --rm -p8000:8000 -p8001:8001 -p8002:8002 -v/full/path/to/docs/examples/model_repository:/models nvcr.io/nvidia/tritonserver:<xx.yy>-py3 tritonserver --model-repository=/models
 ```
+
+Kubernetes 에서 YAML로 선언할 때에는 아래의 예시가 있다:
+```yaml
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triton-inference-server
+  namespace: triton
+  labels:
+    app: triton-inference-server
+spec:
+  selector:
+    matchLabels:
+      app: triton-inference-server
+  replicas: 1
+  strategy:
+    rollingUpdate: # GPU가 한 장일때는 이와 같이 작성 -> 다운타임 존재
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: triton-dta-inference-server
+      labels:
+        app: triton-inference-server
+    spec:
+      containers:
+        - name: triton-dta-inference-server
+          image: nvcr.io/nvidia/tritonserver:25.12-py3 # YY-MM
+          imagePullPolicy: IfNotPresent
+          args:
+            - tritonserver
+            - --model-repository=/models
+            - --strict-model-config=false
+            - --log-verbose=1
+            - --disable-auto-complete-config # config.pbtxt 자동생성 비활성화
+          ports:
+            - containerPort: 8000 # http
+              name: http
+            - containerPort: 8001 # grpc
+              name: grpc
+            - containerPort: 8002 # prometheus
+              name: prometheus
+          resources:
+            requests:
+              cpu: "2"
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 4Gi
+              nvidia.com/gpu: 1 # GPU 한 장
+          startupProbe:
+            httpGet:
+              path: /v2/health/ready
+              port: 8000
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /v2/health/live
+              port: 8000
+            timeoutSeconds: 2
+            failureThreshold: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /v2/health/ready
+              port: 8000
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: triton-models
+              mountPath: /models
+      volumes:
+        - name: triton-models
+          persistentVolumeClaim:
+            claimName: triton-models-pvc
+      restartPolicy: Always
+---
+```

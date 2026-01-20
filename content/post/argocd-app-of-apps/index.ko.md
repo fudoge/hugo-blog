@@ -1,6 +1,6 @@
 ---
 title: "ArgoCD: App of Apps 패턴 사용하기"
-description: App of Apps 패턴을 통해 최소화하자
+description: App of Apps 패턴을 통해 Application CRD들도 GitOps로 관리하자
 date: 2025-11-15T14:16:33+09:00
 image: argocd-logo.png 
 math: 
@@ -25,6 +25,7 @@ ArgoCD에는 Application이라는 배포 단위를 가진다.
 
 ![Apps without Root App](apps-without-root.png)
 ![Apps with Root App](apps-with-root.png)
+
 
 이후에는 Root App을 제외하고는 모두 선언형으로 관리되어, Application CRD의 명령형 관리영역을 단일 지점으로 줄일 수 있다.
 
@@ -83,3 +84,5 @@ kubectl apply -f argocd/root-app.yaml
 ```
 
 이제, 클러스터를 옮겨도 Root App을 통해서 한 번에 여러 애플리케션들을 연쇄적으로 업데이트 할 수 있다.
+
+![ArgoCD Root App](argocd-dashboard.png)
