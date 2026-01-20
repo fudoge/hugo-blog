@@ -8,6 +8,12 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Conatiner
+    - TritonServer
+categories:
+    - TritonServer
 ---
 
 Triton Inference Server에서 가장 단순한 방법인 Python Backend에 대해 알아볼 것이다.  
