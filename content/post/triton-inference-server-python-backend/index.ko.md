@@ -314,56 +314,6 @@ models
     `-- triton_python_backend_stub
 ```
 
-### 커스텀 stub만들기 예시
-```bash
-# 컨테이너 안에서 
-# 패키지 업데이트
-apt update && apt install -y rapidjson-dev libarchive-dev
-
-# Miniconda 설치
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-sudo bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
-export PATH="/opt/miniconda/bin:$PATH"
-
-# TOS 승인
-conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
-conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
-
-# conda 환경 초기화
-conda init
-source ~/.bashrc
-
-# conda 환경 생성
-conda create -n py38 python=3.8 -y
-conda activate py38
-pip install cmake==3.31.10
-
-# Triton Python Backend 레포지토리 클론 및 빌드 작업 경로로 디렉토리 이동
-git clone https://github.com/triton-inference-server/python_backend -b r25.09 # 자신에게 맞는 버전의 브랜치를 쓸 것.
-cd python_backend
-mkdir build && cd build
-
-# 빌드
-# GPU를 쓰지 않는다면, `-DTRITON_ENABLE_GPU=OFF`로 할 것.
-# 여기서도 Triton 버전을 알맞게 표시할 것
-cmake -DTRITON_ENABLE_GPU=ON \
- -DTRITON_BACKEND_REPO_TAG=r25.09 \
- -DTRITON_COMMON_REPO_TAG=r25.09 \
- -DTRITON_CORE_REPO_TAG=r25.09 \
- -DCMAKE_INSTALL_PREFIX:PATH=$(pwd)/install ..
-
-make triton-python-backend-stub
-
-# libpython3.8.so.1.0을 링크하는지 확인
-ldd triton_python_backend_stub | grep python
-
-# 빌드된 아티팩트 이동
-cp triton_python_backend_stub /workspaces/triton-devcontainer/model_repository/add_one/triton_python_backend_stub
-```
-
-`ldd`로 링크를 확인하면, 아래와 같다:
-![Check with ldd](custom-stub.png)
-
 ### Custom 실행 환경 만들기
 만약 필요한 의존성을 담고 싶다면, 커스텀 실행 환경을 만들면 된다.  
 Python backend는 `conda-pack`을 지원한다.
@@ -456,7 +406,7 @@ parameters: {
 
 Triton의 Python Backend로 모델을 서빙해보자.  
 이번 예시에서는 주어진 정수에 1을 더해주는 간단한 모델을 만들어줄 것이다.  
-Python 버전은 3.8환경, numpy를 포함시켜서 서빙시켜 볼 것이다.
+Python 3.8환경에서 numpy를 포함시켜서 서빙시켜 볼 것이다.
 
 폴더 구조를 아래와 같이 만들 것이다:  
 ```bash
@@ -473,6 +423,7 @@ model_repository
 
 Triton Python Backend는 vscode에서의 개발환경을 지원한다.  
 vscode에서 Dev Containers 확장을 설치한다.  
+Pasted image 20260120101659.png
 ![Install Dev Containers ](install-devcontainer.png)
 
 프로젝트 루트에 `.devcontainer`라는 디렉토리를 생성하고, 아래의 두 파일을 만든다:
@@ -568,6 +519,55 @@ USER ${USERNAME}
 
 나중에 DevContainer에서 빠져나올때는 명령 팔레트에서 Reopen하되, Container말고 기존의 로컬 옵션을 이용한다.  
 
+### Python 3.8 custom stub 만들기
+```bash
+# 컨테이너 안에서 
+# 패키지 업데이트
+apt update && apt install -y rapidjson-dev libarchive-dev
+
+# Miniconda 설치
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sudo bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
+export PATH="/opt/miniconda/bin:$PATH"
+
+# TOS 승인
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+# conda 환경 초기화
+conda init
+source ~/.bashrc
+
+# conda 환경 생성
+conda create -n py38 python=3.8 -y
+conda activate py38
+pip install cmake==3.31.10
+
+# Triton Python Backend 레포지토리 클론 및 빌드 작업 경로로 디렉토리 이동
+git clone https://github.com/triton-inference-server/python_backend -b r25.09 # 자신에게 맞는 버전의 브랜치를 쓸 것.
+cd python_backend
+mkdir build && cd build
+
+# 빌드
+# GPU를 쓰지 않는다면, `-DTRITON_ENABLE_GPU=OFF`로 할 것.
+# 여기서도 Triton 버전을 알맞게 표시할 것
+cmake -DTRITON_ENABLE_GPU=ON \
+ -DTRITON_BACKEND_REPO_TAG=r25.09 \
+ -DTRITON_COMMON_REPO_TAG=r25.09 \
+ -DTRITON_CORE_REPO_TAG=r25.09 \
+ -DCMAKE_INSTALL_PREFIX:PATH=$(pwd)/install ..
+
+make triton-python-backend-stub
+
+# libpython3.8.so.1.0을 링크하는지 확인
+ldd triton_python_backend_stub | grep python
+
+# 빌드된 아티팩트 이동
+cp triton_python_backend_stub /workspaces/triton-devcontainer/model_repository/add_one/triton_python_backend_stub
+```
+
+`ldd`로 링크를 확인하면, 아래와 같다:
+![Check with ldd](custom-stub.png)
 
 ### `conda pack`으로 필요한 의존성 패킹하기
 
@@ -580,6 +580,33 @@ pip install conda-pack
 conda pack -n py38 -o add_one_env.tar.gz
 ```
 
+### 주의: conda pack과 custom stub
+custom stub을 빌드하고 나서, 이후에 빌드한 컨테이너를 빠져나온 뒤에는 `lld`에서 `libpython` 링크가 not found로 보인다.  
+그래서 빌드를 잘못한 것은 아닌가 걱정할 수 있다.  
+그러나, `conda pack`을 압축풀어서 안을 확인해보면, `libpython`이 있다.  
+공식적으로 적혀있는 것을 찾지는 못했지만, 모델을 로딩하면서, conda pack안에있는 libpython에 링크하여 동작하는 듯 하다.  
+즉, 다른 파이썬 버전에서는 custom stub + conda pack이 필수적이다.
+
+```bash
+~/triton-devcontainer on ☁️  (ap-northeast-2) 
+# ldd에서 not found로 보임
+20:55:46  ❯ ldd model_repository/add_one/triton_python_backend_stub | grep python 
+        libpython3.8.so.1.0 => not found
+
+# conda pack 압축해제
+~/triton-devcontainer on ☁️  (ap-northeast-2) 
+20:55:51  ❯ tar -xvf model_repository/add_one/add_one_env.tar.gz -C add_one_env                           
+
+(...)
+
+# libpython이 conda pack안에 있다
+~/triton-devcontainer on ☁️  (ap-northeast-2) 
+21:02:17  ❯ ls add_one_env/lib | grep python
+libpython3.8.so -> libpython3.8.so.1.0
+libpython3.8.so.1.0
+libpython3.so
+python3.8
+```
 
 ### 간단한 `model.py`
 
@@ -587,6 +614,7 @@ conda pack -n py38 -o add_one_env.tar.gz
 ```python
 import triton_python_backend_utils as pb_utils
 import numpy as np
+import sys
 
 class TritonPythonModel:
     """
@@ -595,6 +623,7 @@ class TritonPythonModel:
 
     def initialize(self, args):
         pb_utils.Logger.log_info("Model Initializing...")
+        pb_utils.Logger.log_info(sys.version) # 모델 로딩시의 버전을 확인해봅시다
         
     def execute(self, requests):
         responses = []
@@ -668,11 +697,48 @@ parameters: {
 docker run --rm -p 8000:8000 -p 8001:8001 -p 8002:8002 -v ./model_repository:/models nvcr.io/nvidia/tritonserver:25.09-py3 tritonserver --model-repository=/models # 태그 알맞게 작성!
 ```
 
+로그를 확인해보자. Python 3.8버전을 쓰고있다!
+```bash
+=============================
+== Triton Inference Server ==
+=============================
+
+...
+
+I0120 10:28:48.767944 1 model_lifecycle.cc:473] "loading: add_one:1"
+I0120 10:28:48.772835 1 python_be.cc:1851] "Using Python execution env /models/add_one/add_one_env.tar.gz"
+I0120 10:28:51.613833 1 python_be.cc:2289] "TRITONBACKEND_ModelInstanceInitialize: add_one_0_0 (CPU device 0)"
+I0120 10:28:51.732199 1 model.py:11] "Model Initializing..."
+I0120 10:28:51.732443 1 model.py:12] "3.8.20 (default, Oct  3 2024, 15:32:15) \n[GCC 11.2.0]" # << 여기!!
+I0120 10:28:51.737114 1 model_lifecycle.cc:849] "successfully loaded 'add_one'"
+
+...
+
+I0120 10:28:51.737425 1 server.cc:638] 
++---------+-------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Backend | Path                                                  | Config                                                                                                                                                        |
++---------+-------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| python  | /opt/tritonserver/backends/python/libtriton_python.so | {"cmdline":{"auto-complete-config":"true","backend-directory":"/opt/tritonserver/backends","min-compute-capability":"6.000000","default-max-batch-size":"4"}} |
++---------+-------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+I0120 10:28:51.737493 1 server.cc:681] 
++---------+---------+--------+
+| Model   | Version | Status |
++---------+---------+--------+
+| add_one | 1       | READY  |
++---------+---------+--------+
+
+...
+
+I0120 10:28:51.743777 1 grpc_server.cc:2562] "Started GRPCInferenceService at 0.0.0.0:8001"
+I0120 10:28:51.744013 1 http_server.cc:4789] "Started HTTPService at 0.0.0.0:8000"
+I0120 10:28:51.786121 1 http_server.cc:358] "Started Metrics Service at 0.0.0.0:8002"
+```
+
 Curl을 이용해서 간단히 요청을 날려보자.  
 성공적으로 응답받는 것을 볼 수 있다!
 
 ![Inference with curl](infer.png)
-
 
 ---
 ## 📚 References
