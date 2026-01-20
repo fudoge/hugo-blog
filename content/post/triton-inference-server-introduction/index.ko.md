@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
         - name: triton-inference-server
-          image: nvcr.io/nvidia/tritonserver:25.12-py3 # YY-MM
+          image: nvcr.io/nvidia/tritonserver:25.09-py3 # YY-MM
           imagePullPolicy: IfNotPresent
           args:
             - tritonserver
