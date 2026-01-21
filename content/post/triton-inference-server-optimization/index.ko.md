@@ -351,4 +351,5 @@ Concurrency: 16, throughput: 4141.76 infer/sec, latency 5251 usec
 
 ---
 ## 📚 References
-- [https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/optimization.html](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/optimization.html)
+- [Optimization](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/optimization.html)
+- [Perf Analyzer](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/perf_analyzer/docs/cli.html)
