@@ -429,7 +429,6 @@ model_repository
 
 Triton Python Backend는 vscode에서의 개발환경을 지원한다.  
 vscode에서 Dev Containers 확장을 설치한다.  
-Pasted image 20260120101659.png
 ![Install Dev Containers ](install-devcontainer.png)
 
 프로젝트 루트에 `.devcontainer`라는 디렉토리를 생성하고, 아래의 두 파일을 만든다:
