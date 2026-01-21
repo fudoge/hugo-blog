@@ -17,7 +17,7 @@ categories:
 ---
 
 Triton Inference Server에서 가장 단순한 방법인 Python Backend에 대해 알아볼 것이다.  
-성능은 Pytorch, Onnx등, 다른 Backend가 더 좋다.  
+성능은 Python의 GIL등에 의해 조금 떨어지며, C/C++, CUDA native한 Pytorch, Onnx등의 다른 Backend가 성능이 더 좋다.  
 대신, 간편하게 모델을 올릴 수 있다.
 
 ---
