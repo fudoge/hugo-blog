@@ -1,7 +1,7 @@
 ---
 title: "Triton Inference Server: Optimization"
 description: Triton Inference Server에서 Perf Analyzer로 성능을 튜닝해보자
-date: 2026-01-10T10:48:09+09:00
+date: 2026-01-10T22:48:09+09:00
 image: tritonserver-logo.png
 math: 
 license: 

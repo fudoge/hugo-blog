@@ -1,40 +1,43 @@
 // =============================
 // 1. 코드 블록 레이아웃 및 디자인
 // =============================
-
 $codeblock-max-height: 25em;
 
 .article-content .highlight {
   padding: 30px 1.25rem 0.75rem 0.9rem;
   max-width: 95%;
   margin: 1rem auto;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 15px rgba(1, 0, 0, 0.15);
   border-radius: 12px;
   max-height: $codeblock-max-height;
   overflow: auto;
-  position: relative; // 버튼 위치 기준점
+  position: relative;
+  transition: box-shadow 0.2s ease;
+  
+  &:hover {
+    box-shadow: 0 8px 20px rgba(1, 0, 0, 0.2);
+  }
 }
 
 /* 중요: 코드가 버튼에 가려지지 않게 오른쪽 패딩 추가 */
 .article-content pre {
   padding: 0 !important;
+  margin: 0 !important;
   line-height: 1.6;
   font-size: 14px;
   font-family: var(--code-font-family);
-  margin: 0;
   overflow: visible !important;
 }
 
 // =============================
 // 2. 가독성 및 기능 설정
 // =============================
-
 /* 줄 번호 및 코드 테이블 최적화 */
 .lntable {
   display: inline-table;
-  min-width: max-content;
+  width: 100%;
   border-spacing: 0;
-  margin-left: 0.25rem;
+  margin-left: 0;
 }
 
 /* 줄 바꿈 방지 (가로 스크롤 활성화) */
@@ -43,17 +46,25 @@ $codeblock-max-height: 25em;
   white-space: pre !important;
 }
 
+/* 첫 번째 td (줄 번호) */
 .lntd:first-child {
   user-select: none;
-  /* 줄 번호 선택 방지 */
-  padding-right: 0.75rem;
-  opacity: 0.6;   // 줄 번호 살짝 연하게
+  padding-right: 1rem;
+  opacity: 0.4;
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  vertical-align: top;
+}
+
+/* 두 번째 td (코드) */
+.lntd:last-child {
+  width: 99%;
 }
 
 // =============================
 // 3. 스크롤바 디자인 (Slim)
 // =============================
-
 .article-content .highlight::-webkit-scrollbar {
   height: 8px;
   width: 8px;
@@ -71,11 +82,10 @@ $codeblock-max-height: 25em;
 // =============================
 // 4. Copy 버튼 디자인 (테마 대응)
 // =============================
-
 button.copyCodeButton {
     position: absolute;
-    top: 50%;               /* 세로 중앙 정렬 준비 */
-    transform: translateY(-50%) translateY(-2px); /* 중앙 정렬 + 살짝 띄움 */
+    top: 50%;
+    transform: translateY(-50%) translateY(-2px);
     right: 12px;
     
     padding: 6px 12px;
@@ -87,40 +97,56 @@ button.copyCodeButton {
     opacity: 0;
     transition: all 0.2s ease;
     z-index: 10;
-
+    
     // [기본: 라이트 모드 스타일]
     color: rgba(0, 0, 0, 0.5); 
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(8px);
-
+    
     // [다크 모드 스타일 오버라이드]
     [data-scheme="dark"] & {
         color: rgba(255, 255, 255, 0.7);
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
+    
+    // 클릭 시 효과
+    &:active {
+        transform: translateY(-50%) scale(0.95);
+    }
 }
 
 /* 호버 시 스타일 */
 .highlight:hover button.copyCodeButton {
     opacity: 1;
-    transform: translateY(-50%) translateY(0); /* 제자리로 */
+    transform: translateY(-50%) translateY(0);
     
     background: rgba(0, 0, 0, 0.1);
     color: rgba(0, 0, 0, 0.8);
-
+    
     [data-scheme="dark"] & {
         background: rgba(255, 255, 255, 0.2);
         color: #fff;
     }
 }
 
+/* 복사 완료 시 스타일 */
+button.copyCodeButton.copied {
+    background: rgba(39, 201, 63, 0.2) !important;
+    color: #27c93f !important;
+    border-color: rgba(39, 201, 63, 0.3) !important;
+    
+    [data-scheme="dark"] & {
+        background: rgba(39, 201, 63, 0.25) !important;
+        color: #4ade80 !important;
+    }
+}
+
 // =============================
 // 5. MacOS style button
 // =============================
-
-/* 가짜 맥 스타일 버튼 추가 */
+/* 가짜 맥 스타일 버튼 */
 .article-content .highlight::before {
     content: "";
     position: absolute;
@@ -132,4 +158,30 @@ button.copyCodeButton {
     background: #ff5f56;
     box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
     z-index: 1;
+    transition: opacity 0.2s ease;
+}
+
+.article-content .highlight:hover::before {
+    opacity: 0.8;
+}
+
+// =============================
+// 6. 모바일 최적화
+// =============================
+@media (max-width: 768px) {
+  .article-content .highlight {
+    max-width: 100%;
+    margin: 1rem 0;
+    padding: 30px 0.75rem 0.75rem 0.75rem;
+  }
+  
+  button.copyCodeButton {
+    font-size: 10px;
+    padding: 5px 10px;
+  }
+  
+  .article-content .highlight::before {
+    transform: scale(0.8);
+    transform-origin: top left;
+  }
 }
