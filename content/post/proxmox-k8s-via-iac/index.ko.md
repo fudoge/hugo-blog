@@ -1,6 +1,6 @@
 ---
-title: "Proxmox Homelab 구성 - 2. IaC로 구성하는 쿠버네티스"
-description: Terraform/Opentofu + Ansible을 이용해서 홈랩 쿠버네티스 클러스터를 구축
+title: "Proxmox Homelab 구성 - 2. 쿠버네티스 클러스터 구축"
+description: Terraform/Opentofu + Ansible을 이용해서 홈랩 쿠버네티스 클러스터 구축하기
 date: 2026-01-24T10:47:26+09:00
 image: topology.png
 math: 
@@ -22,9 +22,7 @@ Tags:
     - Ansible
 ---
 
-
-
-Proxmox의 VM 및 LXC등을 Terraform/Opentofu로 관리 가능하다.  
+Proxmox의 VM 및 LXC등을 Terraform/Opentofu로 관리하여 선언적으로 홈랩 인프라를 관리할 수 있다.  
 여기서는 [bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest/docs)([opentofu버전은 여기](https://search.opentofu.org/provider/bpg/proxmox/latest)) Provider를 이용한다.
 
 아래의 네트워크 토폴로지를 구성할 것이다:
