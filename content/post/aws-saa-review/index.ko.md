@@ -2,7 +2,7 @@
 title: "AWS Solutions Architect Associate(SAA-C03) 후기"
 description: 
 date: 2025-09-17T19:35:32+09:00
-image: aws-logo.png
+image: aws-saa-pass.png
 math: 
 license: 
 hidden: false
