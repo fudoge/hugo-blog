@@ -36,8 +36,7 @@ nix-shell -p nodejs
 nix shell -p nixpkgs#nodejs
 ```
 
-![Temporary Nix shell](nix-temp-shell.png)
-
+![Temporary Nix shell without flake](nix-temp-shell.png)
 ![With flake](nix-temp-shell-flake.png)
 
 
