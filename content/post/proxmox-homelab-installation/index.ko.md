@@ -2,7 +2,7 @@
 title: "Proxmox Homelab 구성 - 0. Proxmox 설치하기"
 description: 홈랩 PC에 Proxmox를 설치해보자
 date: 2026-01-10T14:51:41+09:00
-image: proxmox-logo.png
+image: minipc.webp
 math: 
 license: 
 hidden: false

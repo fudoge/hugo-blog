@@ -2,7 +2,7 @@
 title: "Proxmox Homelab 구성 - 1. Proxmox 초기 세팅"
 description: 초기 Proxmox 클러스터 세팅을 해보자
 date: 2026-01-11T14:10:58+09:00
-image: proxmox-logo.png
+image: delete-lvm.png
 math: 
 license: 
 hidden: false
