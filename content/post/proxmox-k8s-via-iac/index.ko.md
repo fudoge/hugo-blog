@@ -3,30 +3,32 @@ title: "Proxmox Homelab 구성 - 2. 쿠버네티스 클러스터 구축"
 description: Terraform/Opentofu + Ansible을 이용해서 홈랩 쿠버네티스 클러스터 구축하기
 date: 2026-01-24T10:47:26+09:00
 image: topology.png
-math: 
-license: 
+math:
+license:
 hidden: false
 comments: true
 draft: false
 
 Categories:
-    - HomeLab
+  - HomeLab
 
 Tags:
-    - HomeLab
-    - Proxmox
-    - TailScale
-    - Kubernetes
-    - Terraform
-    - Opentofu
-    - Ansible
+  - HomeLab
+  - Proxmox
+  - TailScale
+  - Kubernetes
+  - Terraform
+  - Opentofu
+  - Ansible
 ---
 
-Proxmox의 VM 및 LXC등을 Terraform/Opentofu로 관리하여 선언적으로 홈랩 인프라를 관리할 수 있다.  
-여기서는 [bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest/docs)([opentofu버전은 여기](https://search.opentofu.org/provider/bpg/proxmox/latest)) Provider를 이용한다.
+Proxmox의 VM 및 LXC등을 Terraform/Opentofu로 관리하여 선언적으로 홈랩 인프라를
+관리할 수 있다.\
+여기서는
+[bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest/docs)([opentofu버전은 여기](https://search.opentofu.org/provider/bpg/proxmox/latest))
+Provider를 이용한다.
 
-아래의 네트워크 토폴로지를 구성할 것이다:
-![Topology](topology.png)
+아래의 네트워크 토폴로지를 구성할 것이다: ![Topology](topology.png)
 
 ---
 ## ⚙️ Proxmox에서 Terraform 유저 만들기
@@ -56,18 +58,19 @@ pveum user token add terraform-prov@pve mytoken
 
 나온 값을 안전한 곳에 저장해주자.
 
-기본적으로, token이 user의 권한을 다 계승받는 것이 아니다.   
-**Privilege Separation**이 되어있다.   
+기본적으로, token이 user의 권한을 다 계승받는 것이 아니다.
+**Privilege Separation**이 되어있다.
 그래서, **role을 별도로 바인딩**해줘야 한다.
 
 ```bash
 pveum aclmod / -token 'terraform-prov@pve!mytoken' -role TerraformProv
 ```
-
 ---
+
 ## 🫥 `.gitignore`
 
 `.gitignore`에 다음 파일들을 넣어주자
+
 ```gitignore
 .terraform/
 .DS_Store
@@ -125,19 +128,23 @@ pveum aclmod / -token 'terraform-prov@pve!mytoken' -role TerraformProv
 │       ├── provider.tf
 │       └── variable.tf
 ```
-
 ---
+
 ## 📦 Provider 설정
+
 각 세부폴더별 provider를 다음과 같이 세팅한다:
 
 ### SSH 에이전트 세팅
 
 ssh키가 없다면, 생성한다.
+
 ```bash
 ssh-keygen
 ```
 
-사용하려는 Opentofu Provider가 파일을 조작할 때, SSH Agent를 이용하기에, SSH 키를 배포해야 한다.
+사용하려는 Opentofu Provider가 파일을 조작할 때, SSH Agent를 이용하기에, SSH
+키를 배포해야 한다.
+
 ```bash
 # SSH Agent 실행
 eval $(ssh-agent -s)
@@ -153,6 +160,7 @@ ssh-copy-id root@<proxmox-node>
 ### `provider.tf`
 
 `provider.tf`에 아래 내용을 추가한다.
+
 ```hcl
 terraform {
   required_providers {
@@ -176,6 +184,7 @@ provider "proxmox" {
 ```
 
 `variable.tf`에 `proxmox_api_token`값을 저장한다.
+
 ```hcl
 variable "proxmox_api_token" {
   type = string
@@ -183,14 +192,15 @@ variable "proxmox_api_token" {
 ```
 
 이후, provider를 세팅해준다.
+
 ```bash
 tofu init
 ```
 
 ---
 ## 🧱 모듈
-테라폼 코드의 재사용성을 위해, 모듈화를 진행해주었다.  
-여기서는 두 가지의 핵심 모듈이 있다:  
+테라폼 코드의 재사용성을 위해, 모듈화를 진행해주었다.
+여기서는 두 가지의 핵심 모듈이 있다:
 - **탬플릿 모듈** - 클라우드 이미지를 참조하여 proxmox에서 template vm으로 기초적인 뼈대를 생성하는 모듈
 - **vm모듈** - 탬플릿을 참조하여 vm을 생성한 뒤, cloud-init을 이용하여 세부 설정
 
@@ -205,7 +215,7 @@ tofu init
 - 재현성
 - 자동화 친화적
 
-참고로, 모듈의 `provider.tf`에는 `provider "proxmox"{}` 부분이 없어도 된다. 
+참고로, 모듈의 `provider.tf`에는 `provider "proxmox"{}` 부분이 없어도 된다.
 모듈에서는 자격 증명을 요구하지 않기 때문이다.
 
 ### 탬플릿 모듈
@@ -378,7 +388,7 @@ variable "cloud_init_data" {
 }
 ```
 
-이미 익숙한 변수들이 보인다.  
+이미 익숙한 변수들이 보인다.
 추가적으로, 다음의 변수들이 보인다:
 - 참조할 `template_id`
 - 덮어씌울 컴퓨팅 스펙
@@ -449,9 +459,9 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
 }
 ```
 
-Proxmox는 기본적으로 Shutdown, Reboot등을  ACPI로 제어하여, VM안에서 qemu-guest-agent가 필요하지 않다.  
-그러나, 간혹 통하지 않는 VM이 있다고 한다.  
-이러면 destroy시 무한로딩이 걸릴 수 있다.  
+Proxmox는 기본적으로 Shutdown, Reboot등을  ACPI로 제어하여, VM안에서 qemu-guest-agent가 필요하지 않다.
+그러나, 간혹 통하지 않는 VM이 있다고 한다.
+이러면 destroy시 무한로딩이 걸릴 수 있다.
 그래서, qemu-guest-agent를 활성화시키는 것을 보장하기로 약속하는 플래그로 `agent.enabled = true`를 설정한다.
 
 단, qemu-guest-agent가 설치되어야 하는데, 대부분의 클라우드 이미지에는 없을 것이다.
@@ -470,12 +480,13 @@ output "ips" {
   value = proxmox_virtual_environment_vm.vm.ipv4_addresses
 }
 ```
-
 ---
+
 ## 🌐 내부 네트워크 생성
 
-`vmbr1`이라는 가상 네트워크 인터페이스를 만들어준다.  
+`vmbr1`이라는 가상 네트워크 인터페이스를 만들어준다.\
 proxmox 내부 네트워크를 위해 만들어줬다.
+
 ```bash
 # 00.network/main.tf
 resource "proxmox_virtual_environment_network_linux_bridge" "vmbr1" {
@@ -483,21 +494,20 @@ resource "proxmox_virtual_environment_network_linux_bridge" "vmbr1" {
   name      = "vmbr1"
   comment = "In-proxmox network"
 }
-
 ```
 
 이후, 적용해준다.
+
 ```bash
 tofu apply
 ```
 
 대시보드에서 vmbr1이 생긴 것을 확인할 수 있다.
 
-
 ---
 ## 🐣 탬플릿 생성
 
-이제, 모듈을 참조해서 자원을 만들어보자.  
+이제, 모듈을 참조해서 자원을 만들어보자.
 Ubuntu 24.04 LTS 클라우드 이미지를 기반으로 탬플릿을 생성해준다.
 
 ```hcl
@@ -525,12 +535,12 @@ output "id" {
 ```bash
 tofu init
 ```
-
 ---
+
 ## ↔️ 라우터 vm 생성
 
-라우터 역할을 할 vm을 생성해준다.   
-이 vm에서는 FRRouting BGP +  NAT + Tailscale Subnet Router를 제공해줄 것이다.  
+라우터 역할을 할 vm을 생성해준다.\
+이 vm에서는 FRRouting BGP + NAT + Tailscale Subnet Router를 제공해줄 것이다.
 
 ```hcl
 # 10.routers/main.tf
@@ -574,13 +584,16 @@ module "frrouter" {
 }
 ```
 
-Ubuntu template으로부터 clone시키고, 별도의 cloud-init을 주입하여 NAT셋업을 해준다.  
+Ubuntu template으로부터 clone시키고, 별도의 cloud-init을 주입하여 NAT셋업을
+해준다.\
 SSH 키도 같이 주입해준다.
 
 ### Cloud-init
 
-qemu-guest-agent와 기타 필수 프로그램을 설치한다.  
-이후, 패킷을 포워딩하도록 커널 모듈을 활성화해주고, iptables의 포워딩 규칙도 추가하여 **proxmox 내부 네트워크에서 외부로 NAT가 가능하도록** 정책을 적용해준다.
+qemu-guest-agent와 기타 필수 프로그램을 설치한다.\
+이후, 패킷을 포워딩하도록 커널 모듈을 활성화해주고, iptables의 포워딩 규칙도
+추가하여 **proxmox 내부 네트워크에서 외부로 NAT가 가능하도록** 정책을
+적용해준다.
 
 ```yaml
 # 98.frr-cloud-config.yaml
@@ -616,11 +629,9 @@ runcmd:
   - echo "Cloud-init finished at $(date)" > /var/log/cloud-init-done.log
 ```
 
-
-
 ### `outputs.tf`
 
-IP를 조회할 수 있도록 output을 만들어준다.  
+IP를 조회할 수 있도록 output을 만들어준다.\
 쿠버네티스 노드들이 기본 게이트웨이를 참조할 때도 필요하다.
 
 ```hcl
@@ -631,7 +642,10 @@ output "frr_ip" {
 ```
 
 ### 적용
-적용 시, 라우터 vm이 생성되고, 두 개의 네트워크 인터페이스로 공유기의 네트워크와 proxmox클러스터 내부 네트워크에 둘다 연결된다.
+
+적용 시, 라우터 vm이 생성되고, 두 개의 네트워크 인터페이스로 공유기의 네트워크와
+proxmox클러스터 내부 네트워크에 둘다 연결된다.
+
 ```bash
 tofu init
 ```
@@ -639,12 +653,12 @@ tofu init
 ---
 ## 🐥 k8s노드 vm 생성
 
-이제, 쿠버네티스 노드들을 위한 vm들을 생성해준다.  
-반복문을 이용해서 값만 변경하여 여러 개 생성한다.  
+이제, 쿠버네티스 노드들을 위한 vm들을 생성해준다.
+반복문을 이용해서 값만 변경하여 여러 개 생성한다.
 
-template vm의 id와 라우터의 내부망 ip를 remote_state로 참조해온다.  
-그뒤, 3개의 노드를 생성한다.  
-**기본 게이트웨이로 앞에서 만든 라우터로 트래픽이 향하도록** 만든 것을 알 수 있다.  
+template vm의 id와 라우터의 내부망 ip를 remote_state로 참조해온다.
+그뒤, 3개의 노드를 생성한다.
+**기본 게이트웨이로 앞에서 만든 라우터로 트래픽이 향하도록** 만든 것을 알 수 있다.
 
 ```hcl
 # 11.nodes/main.tf
@@ -726,6 +740,7 @@ module "k8s-node" {
 ### Cloud-init
 
 여기서는 별도의 큰 작업 없이, 일부 필수프로그램만 받아주며 ssh키만 추가한다.
+또한, NAT설정을 하도록 커널 모듈 로딩과 방화벽 설정을 해주었다.
 
 ```yaml
 # 98.cloud-init/general-vm-config.yaml
@@ -742,13 +757,26 @@ packages:
   - qemu-guest-agent
   - curl
   - vim
+  - iptables-persistent
+
+write_files:
+  - path: /etc/sysctl.d/99-forward.conf
+    owner: root:root
+    permissions: '0644'
+    content: |
+      net.ipv4.ip_forward = 1
+      net.ipv6.conf.all.forwarding = 1
 
 runcmd:
   - apt update
   - apt upgrade -y
   - systemctl enable --now qemu-guest-agent
+  - sysctl --system
+  - iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  - iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+  - iptables -A FORWARD -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+  - netfilter-persistent save
   - echo "Cloud-init finished at $(date)" > /var/log/cloud-init-done.log
-
 ```
 
 ### `outputs.tf`
@@ -769,14 +797,17 @@ output "k8s_node_ips" {
 ```bash
 tofu apply
 ```
-
 ---
+
 ## 🔐 Tailscale 설치
-Tailscale은 Wireguard기반의 VPN을 지원해주는 서비스이다.  
-이를 이용해서 Proxmox 클러스터 내부의 vm들에 접근할 수 있도록 해줄 것이다.  
-그러나, 각각의 VM이 tailnet VPN에 가입되는것은 번거롭기에, Subnet Router 기능을 이용해서 라우터 VM에만 VPN을 가입시키고, 트래픽을 중개시켜줄 것이다.
+
+Tailscale은 Wireguard기반의 VPN을 지원해주는 서비스이다.\
+이를 이용해서 Proxmox 클러스터 내부의 vm들에 접근할 수 있도록 해줄 것이다.\
+그러나, 각각의 VM이 tailnet VPN에 가입되는것은 번거롭기에, Subnet Router 기능을
+이용해서 라우터 VM에만 VPN을 가입시키고, 트래픽을 중개시켜줄 것이다.
 
 ### Router에 Tailscale설치
+
 bastion host(FRRouter)에 접속해서 Tailscale을 설치해준다.
 
 ```bash
@@ -791,23 +822,25 @@ sudo tailscale up
 
 ### Subnet router 기능 이용하기
 
-[공식 문서](https://tailscale.com/docs/features/subnet-routers#connect-to-tailscale-as-a-subnet-router)에 따르면, 원래는 패킷 포워딩설정을 먼저 해줘야 하지만, 우리는 이미 cloud-init에서 했기에 건너뛴다.  
+[공식 문서](https://tailscale.com/docs/features/subnet-routers#connect-to-tailscale-as-a-subnet-router)에
+따르면, 원래는 패킷 포워딩설정을 먼저 해줘야 하지만, 우리는 이미 cloud-init에서
+했기에 건너뛴다.
 
-광고할 서브넷을 세팅해준다.  
+광고할 서브넷을 세팅해준다.
+
 ```bash
 sudo tailscale set --advertise-routes=192.168.10.0/24
 ```
 
-
-이후, Admin Console에서 승인해준다.
-![Subnet Router](subnet-router.png)
+이후, Admin Console에서 승인해준다. ![Subnet Router](subnet-router.png)
 
 ### 확인
-이제, 우리는 내부 네트워크 노드에 모두 접근 가능하다!  
+
+이제, 우리는 내부 네트워크 노드에 모두 접근 가능하다!\
 Ping을 해봐도 된다.
 
-
 ### SSH를 이용한 접속
+
 아래와 같은 ssh config를 작성해두면 편하다.
 
 ```nginx
@@ -830,10 +863,10 @@ Host worker-2
     User ubuntu
     Hostname 192.168.10.101
     IdentityFile ~/.ssh/id_rsa
-
 ```
 
 이후, 각각 SSH로 접속해보자.
+
 ```bash
 ssh bastion
 # Ctrl + D 또는 exit으로 나온 뒤
@@ -844,13 +877,14 @@ ssh worker-1
 ssh worker-2
 ```
 
-만약, 이전에 같은 호스트 및 정보로 vm을 사용하다가 삭제 후 재생성 등으로 인해서, `~/.ssh/known_hosts`의 정보가 충돌하는 경우가 있는데, 이 경우 `~/.ssh/known_hosts`의 해당 호스트 정보를 제거하고 다시 접속을 시도해보면 된다.
-
+만약, 이전에 같은 호스트 및 정보로 vm을 사용하다가 삭제 후 재생성 등으로 인해서,
+`~/.ssh/known_hosts`의 정보가 충돌하는 경우가 있는데, 이 경우
+`~/.ssh/known_hosts`의 해당 호스트 정보를 제거하고 다시 접속을 시도해보면 된다.
 
 ---
 ## ☸️ 쿠버네티스 설치
 
-이전에 만들어준 Ansible을 활용한 Kubernetes의 요소들을 설치하는 플레이북이 있다. 이를 이용하자.  
+이전에 만들어준 Ansible을 활용한 Kubernetes의 요소들을 설치하는 플레이북이 있다. 이를 이용하자.
 아래 링크에서 설치에 대해 도움받을 수 있을 것이다.
 
 자세한 내용은 [이 게시글]({{< relref "post/how-tailscale-works" >}})에서 확인가능하다.
@@ -892,15 +926,16 @@ workers
 ```bash
 root@cp-1:~# kubectl get no
 NAME       STATUS   ROLES           AGE   VERSION
-cp-1       Ready    control-plane   16m   v1.35.0 
+cp-1       Ready    control-plane   16m   v1.35.0
 worker-1   Ready    <none>          11m   v1.35.0
 worker-2   Ready    <none>          10m   v1.35.0
 ```
-
 ---
+
 ## 🪪 자격 증명 가져오기
 
 우선, Control Plane에서 ubuntu유저의 것으로 가져오자.
+
 ```bash
 # cp-1에서
 mkdir -p ~/.kube
@@ -920,5 +955,7 @@ vim ~/.kube/config.homelab
 KUBECONFIG=~/.kube/config:~/.kube/config.homelab kubectl config view --merge --flatten > ~/.kube/config
 ```
 
-이제, 마음껏 `kubectl`을 써주면 된다!  
-다음은 Cilium BGP Peering을 위한 FRR 셋업과 Ceph스토리지 생성 등을 알아볼 것이다.
+이제, 마음껏 `kubectl`을 써주면 된다!\
+다음은 Cilium BGP Peering을 위한 FRR 셋업과 Ceph스토리지 생성 등을 알아볼
+것이다.
+
