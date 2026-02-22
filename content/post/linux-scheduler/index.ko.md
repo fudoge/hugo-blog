@@ -231,7 +231,7 @@ else:
 - `task_tick()`
 
 ---
-## 🍕 그룹 스케줄링
+## 🍕 CFS - 그룹 스케줄링
 
 ### 그룹 스케줄링 개요
 만약 Alice가 1개의 task를 돌리려는데, Bob은 4개의 task를 돌린다고 하자.   
@@ -480,7 +480,7 @@ CFS는 좋은 공정성을 가졌지만, 다음의 문제가 있었다:
 그래서, 이를 보완한 EEVDF 스케줄러가 등장했다.
 
 
-### EEVDF란
+### EEVDF 개요
 **Earliest Eligible Virtual Deadline First(EEVDF)** 스케줄러는 리눅스 커널 6.6버전부터 CFS 스케줄러를 대신한다.   
 기존의 자료구조와 fairness 철학을 유지하며, 기존 CFS 코드를 기반으로 수정되었지만, task의 선택 로직은 바뀌었으며, latency의 모델이 더 명확해졌다.   
 CFS 스케줄러와 유사하게, EEVDF는 runnable task들에 대해 CPU time을 공평하게 할당하는 것을 목표로 한다.   
