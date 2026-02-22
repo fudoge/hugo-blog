@@ -682,4 +682,4 @@ Task가 잠이 들면, runq에서 여전히 남지만, **"deferred dequeue"** �
 - [Oracle Blog - CFS Group Scheduling](https://blogs.oracle.com/linux/cfs-group-scheduling)
 - [Tuning the task scheduler - SUSE System Analysis and Tuning Guide](https://documentation.suse.com/de-de/sles/15-SP7/html/SLES-all/cha-tuning-taskscheduler.html)
 - [The Linux Kernel - EEVDF Scheduler](https://docs.kernel.org/scheduler/sched-eevdf.html)
-- [linux/kernel/sched/fair.c](https://codebrowser.dev/linux/linux/kernel/sched/fair.c.html)
+- [linux/kernel/sched/fair.c](https://github.com/torvalds/linux/blob/master/kernel/sched/fair.c)
