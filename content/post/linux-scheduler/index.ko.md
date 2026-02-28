@@ -129,7 +129,7 @@ $$\triangle vr_A \approx (P \cdot 2/3) \times \frac{c}{2} = P \cdot c / 3$$
 $$\triangle vr_B \approx (P \cdot 1/3) \times \frac{c}{1} = P \cdot c / 3$$
 
 
-현재 task가 자신의 quota보다 더 실행되면, `TIF_NEED_RESHED`플래그가 세팅되어, 다음 기회에 선점(preempt)하고, 다음 task(최소 vruntime)로 교체한다.
+현재 task가 자신의 quota보다 더 실행되면, `TIF_NEED_RESCHED`플래그가 세팅되어, 다음 스케줄 지점에서 reschedule된다.  
 
 > Tick이란?  
 > 리눅스 시스템에서의 주기적 타이머 인터럽트 이다.  
@@ -171,15 +171,22 @@ Task가 블록되거나 종료되면, vruntime이 업데이트되고, `sched_ent
 CFS는 실제 나노초(ns)단위로 정확히 누적시킨다.  
 - 그래서 HS, jiffies에 상관없이 실행시간을 정밀하게 다룬다.  
 
-또한, timeslice라는 개념이 없다.   
+또한, 이전 O(1) 스케줄러가 가지던 방식의 timeslice라는 개념은 없다.
+runq와 부하와 weight에 따라 양이 달라진다.     
 기존에는 휴리스틱 기반의 고정된 시간조각을 돌려주는 설계였지만 이제는 그런 개념을 사용하지 않는다.  
 휴리스틱이 없으면, 규칙의 빈틈이 없어지고, 프로세스가 악용하는 경우를 없앤다.   
 그러한 예외적인 규칙들을 줄이고 수학적으로 실행 시간을 관리하여, 공격이나 악용이 잘 통하지 않게 된다.   
 
-유일한 튜닝은 `/sys/kernel/debug/sched/min_granularity_ns`이다.   
+대신, `/sys/kernel/debug/sched/base_slice_ns`가 튜닝될 수 있다.   
 이는 최소 CPU할당의 하한선인데,   
 값을 작게하면, low-latency가 되어 데스크톱에서 더 즉각적인 경험을 하게 되고,   
 값을 크게하면, batching이 증가하여 캐시 효율도 좋아지고 큰 작업을 묶어 처리하기에도 좋다.   
+
+그러나, `CONFIG_HZ`의 설정에 의해 tick의 간격이 크다면, `base_slice_ns`를 그보다 더 작게 설정해도 실제로는 tick보다 더 자주 변경되지는 어려워서 차이가 없을 수 있다.  
+
+> `CONFIG_HZ`는 1초에 scheduler tick이 몇 번 발생하는지에 대한 설정이다.
+> `TIKC_NSEC`은 tick의 주기를 말한다. 
+> 즉, `base_slice_ns` < `TICK_NSEC` 인 경우, 큰 효과가 없다는 의미이다.
 
 CFS는 모든 runnable task들이 이 스케줄링 기간 안에는 한 번씩은 CPU를 받게 하려고 창을 잡는다.   
 `shced_period = sysctl_sched_latency`이다.   
@@ -219,7 +226,6 @@ else:
 	run idle
 ```
 
-> 서버 워크로드에서는 보통 CFS를 신경쓰면 된다
 
 다음은  hook들의 예시이다:
 - `enqueue_task()`
@@ -273,6 +279,42 @@ task라면 실행하면 되고, `task_group`이라면 `my_q`를 통해 해당 �
 
 `task_group::se[i]`는 항상 큐에존재하는 것이 아닐 수도 있다.   
 해당 그룹 안에서 Runnable한 task가 하나도 없다면, 그 그룹은 Runnable하지 못하므로 상위 큐에 없을 수도 있다. 
+
+#### `load_avg`와 PELT
+**PELT(Per Entity Load Tracking)** 은 여러 sched entitiy들(task 및 task group)에 대해 최근 얼마나 CPU를 필요로 했는지를 추적한다.  
+순간값이 아니라 평균값을 부드럽게 산출한다.  
+기본적으로 **EWMA(Expoenetially Weighted Moving Average, 지수 가중 이동 평균)** 으로 계산되는데, 각 주기(1024us)마다 감쇠되며, `y^32 = 0.5`가 되도록 잡혀 있다.   
+아래와 같이 가중 평균으로 계산된다:  
+```c
+ewma_sum(u) = u_0 + u_1*y + u_2*y^2 + ...
+ewma(u) = ewma_sum(u) / ewma_sum(1) // ewma_sum(1) = 1 + y + y^2 + ...
+```
+
+즉, 32ms전 값은 절반까지 감쇠되고, 그보다 오래된 값은 점점 희미해진다.   
+그렇게 나누다 보면, 최종적으로 0~최대치 범위의 utilization에 근사한 값이 된다.    
+이 공식은 composable한데, 다음과 같은 연산이 가능하다:
+```c
+ewma(A) + ewma(B) = ewma(A+B)
+```
+이 성질은 중요한데, task별 평균을 계산해두고, 그걸 runqueue평균으로도 합칠 수 있으며, task가 CPU를 옮겨다녀도 평균의 재조립이 쉽게 되어있다.  
+-> 스케줄러의 입장에서 매우 편리히다
+
+PELT는 두 가지를 추적한다:
+- running: 실제로 CPU위에서 실행된 시간
+- runnable: runqueue에서 실행 가능한 상태였던 시간
+여러 task들끼리 경쟁하다보면, running보다 runnable이 상대적으로 더 커지는데, runnable에는 실제 사용량과 경쟁 압력이 쌓인다.  
+
+또한, blocked task는 상위 그룹 등의 누적에 계속 반영되는데, 그들이 금방 복귀할 것이 기대되어 CPU를 다시 쓸 가능성이 높아지기 때문이다.  
+
+이외에도, PELT는 주파수와 CPU 성능차를 보정하며, `UTIL_EST`라는 sleep시의 보조 추정치와 utilization clamp 보정 작업들 역시 진행된다.  
+
+정리하면, 스케줄러는 task wakeup, migrate 등의 이벤트마다 PELT값을 갱신하여 schedutil governor에 알려서 CPU 주파수를 조절한다.   
+`running`값, `util_est`, RT/IRQ/Deadline부하, UCLAMP제한 등을 고려하여  
+현재 필요한 utilization와 원하는 주파수를 결정(DVFS)한다.  
+
+이러한 구조로 순간적인 스파이크에 덜 영향받으면서, 최근의 부하를 반영하며, ask migration에서 유영하며, 깨어나는 task에 대해 ramp up 지연을 줄일 수 있다.  
+대신 task migration동안 utilization gap이 생길 수 있으나, 평균 기반이라 완벽할 수 없으며, 시간이 지나며 결국 수렴하는 형태를 띤다.
+
 
 ### 멀티코어에서의 그룹 스케줄링
 두 개의 CPU코어를 가진다고 해보자.   
