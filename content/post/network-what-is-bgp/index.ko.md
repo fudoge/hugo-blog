@@ -249,7 +249,7 @@ OPEN 메시지를 교환하다가, 스펙 등이 호환되지 않는 경우, `NO
 
 아래 명령어들은 CISCO IOS기준이다.  
 
-각각의 라우터에게 ASN을 할당하고, router-id를 넣어주자.
+각각의 라우터에게 ASN을 할당하고, router-id를 넣어주자.  
 R1
 ```shell
 router bgp 65000
