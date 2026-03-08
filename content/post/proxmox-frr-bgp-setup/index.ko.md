@@ -61,7 +61,7 @@ sudo systemctl restart frr
 ---
 ## 📜 BGP란
 
-**BGP(Border Gateway Protocol)**는 AS(Autonomous System)들을 연결하는 정책 기반
+**BGP(Border Gateway Protocol)** 는 AS(Autonomous System)들을 연결하는 정책 기반
 라우팅 프로토콜이다. 최선의 속도만이 아닌, 비용, 보안, 정치적인 사유로 AS들간의
 통신을 설정하여 네트워크 트래픽을 제어한다
 
@@ -70,7 +70,7 @@ Well-known port 179를 이용하여 라우팅 정보를 교환한다. 연결이 
 
 ### AS(Autonomous System)
 
-인터넷은 **자율 시스템(AS: Autonomous System)**이라는 수십만 개의 작은 네트워크로 나뉘어지는데, 이 각각의
+인터넷은 **자율 시스템(AS: Autonomous System)** 이라는 수십만 개의 작은 네트워크로 나뉘어지는데, 이 각각의
 네트워크는 기본적으로 하나의 조직이 운영하는 큰 라우터들의 큰 집합이다.
 
 각 AS는 ASN이라는 고유의 식별 번호를 가진다. 2-octet값, 즉 16비트값으로, 최대
@@ -80,7 +80,7 @@ Well-known port 179를 이용하여 라우팅 정보를 교환한다. 연결이 
 
 ### Address Family
 
-**AF(Address Family)**는 BGP가 어떤 주소 종류와 라우팅 정보 종류를 다루는가에 대해
+**AF(Address Family)** 는 BGP가 어떤 주소 종류와 라우팅 정보 종류를 다루는가에 대해
 구분한다. BGP는 IPv4와 IPv6에 대한 AFI(Address Family Identifier)를 지원한다.
 
 같은 BGP세션(TCP 179)에서 여러 종류의 커넥션들에 대해 각각 광고 여부와 정책,
@@ -108,6 +108,10 @@ FRR의 BGP구현은 아래의 결정을 따른다: 위에 있을수록 더 우�
 11. Router-ID check
 12. Cluster-List length check
 13. Peer address
+
+> NOTE  
+> BGP에 대해서는 [여기]({{< relref "post/network-what-is-bgp" >}})를 더 참조할 수 있다.
+
 ---
 
 ## 🌐 쿠버네티스 앞단의 BGP라우터로 세팅하기
