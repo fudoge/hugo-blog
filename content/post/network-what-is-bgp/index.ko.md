@@ -1,6 +1,6 @@
 ---
 title: "Network - BGP(Border Gateway Protocol)"
-description: 인터넷 라우팅의 핵심인 BGP에 대해 알아보자
+description: 정책을 기반으로 라우트하는 BGP에 대해 알아보자
 date: 2026-03-08T18:17:58+09:00
 image: bgp-1.png
 math: true
