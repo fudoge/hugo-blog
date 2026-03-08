@@ -286,7 +286,7 @@ BGP 네트워크란, BGP 라우터에 의해 관리되는 네트워크 prefix를
 Prefix들은 개별 호스트 라우트라기보단, 서브넷 또는 집계된 라우트이다.      
 너무 긴 Prefix(longer than /24 in IPv4, /48 in IPv6)은 불가능하다.   
 
-CISCO IOS에서 다음과 같이 하면 된다:
+CISCO IOS에서 다음과 같이 하면 된다:   
 R1
 ```shell
 ip route 10.0.0.0 255.0.0.0 Null0 # 소유한 네트워크임을 명시
