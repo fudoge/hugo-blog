@@ -12,11 +12,11 @@ draft: false
 
 
 ## 🌐 BGP란
-**BGP(Border-Gateway Protocol, 경계 게이트웨이 프로토콜)**는자율 시스템들간의 라우팅 프로토콜이다.  
+**BGP(Border-Gateway Protocol, 경계 게이트웨이 프로토콜)** 는 자율 시스템들간의 라우팅 프로토콜이다.  
 서로 다른 AS간에 라우팅 정보를 교환하는 데 쓰이도록 디자인되었다.
 
 ### 자율 시스템
-**AS(Autonomous System, 자율 시스템)** 은 하나의 관리 주체가 운영하는 IP 네트워크들의 그룹이다.  
+**AS(Autonomous System, 자율 시스템)** 는 하나의 관리 주체가 운영하는 IP 네트워크들의 그룹이다.  
 예를 들어, 통신사, 대형 기업, 클라우드 사업자 등이 하나의 AS를 가지고 운영한다.
 
 보통 AS내부의 라우팅은 IGP(Interior Gateway Protocol)라고 하며, 보통 OSPF/IS-IS가 있다.  
