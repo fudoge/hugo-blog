@@ -22,8 +22,8 @@ draft: false
 보통 AS내부의 라우팅은 IGP(Interior Gateway Protocol)라고 하며, 보통 OSPF/IS-IS가 있다.  
 AS간의 라우팅은 EGP(Exterior Gateway Protocol)라고 하며, BGP가 있다.
 
-AS는 **ASN(AS number)** 라는 고유의 식별번호를 가진다.  
-AS의 식별자로서 쓰이며, EGP의 라우팅 정보 교환에도 쓰인다.  
+AS는 **ASN(AS number)** 이라는 고유의 식별번호를 가진다.  
+AS의 식별자로써 쓰이며, EGP의 라우팅 정보 교환에도 쓰인다.  
 ASN은 고유의 32비트 정수이다.    
 처음에는 16비트로, "2-byte ASN"또는 "2-octet ASN"이라고 불렸다    
 이제는 32비트로, 4byte 또는 4octet의 ASN을 가진다.  
