@@ -133,10 +133,12 @@ exit
 router bgp 65000
  # BGP 라우터 ID 설정
  bgp router-id 192.168.10.1
- # K8s-NODES라는 peer-group 생성
+ # K8S-NODES라는 peer-group 생성
  neighbor K8S-NODES peer-group
  # K8S-NODES peer-group의 remote ASN을 65001로 설정
  neighbor K8S-NODES remote-as 65001
+ # capability를 동적으로 협상 가능하게 하도록 설정(새로운 세션 없이)
+ neighbor K8S-NODES capability dynamic
  # 192.168.10.0/24 대역의 노드들이 동적으로 BGP피어링이 가능하도록 설정
  bgp listen range 192.168.10.0/24 peer-group K8S-NODES
  !
