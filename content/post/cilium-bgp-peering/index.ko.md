@@ -739,6 +739,7 @@ spec:
   disabled: false
 ```
 
+생성된 service를 확인해보자.
 
 ```bash
 cilium-playground on  main on ☁️  (ap-northeast-2) on ☁️  fudoge67@gmail.com
