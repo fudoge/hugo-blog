@@ -164,6 +164,8 @@ exit
 
 ![BGP Peering](peering.png)
 
+Cilium쪽에서 BGP Peering을 하는 것에 대한 내용은, [여기]({{< relref "post/cilium-bgp-peering" >}})를 참고할 수 있다.
+
 ---
 
 ## 📚 References
