@@ -827,9 +827,11 @@ sudo tailscale up
 했기에 건너뛴다.
 
 광고할 서브넷을 세팅해준다.
+- `192.168.10.0/24` - Kubernetes Nodes
+- `172.20.0.0/24` - LoadBalancer VIPs
 
 ```bash
-sudo tailscale set --advertise-routes=192.168.10.0/24
+sudo tailscale set --advertise-routes="192.168.10.0/24,172.20.0.0/24"
 ```
 
 이후, Admin Console에서 승인해준다. ![Subnet Router](subnet-router.png)
