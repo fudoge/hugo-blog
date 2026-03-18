@@ -425,6 +425,8 @@ message PingResponse {
 }
 ```
 
+### 조회 및 요청 테스트
+
 우선, service를 조회해보자. 
 ```bash
 $ kubectl get svc
