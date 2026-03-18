@@ -8,6 +8,14 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Kubernetes
+    - Gateway API
+    - Service Mesh
+categories:
+    - Kubernetes
+
 ---
 
 Gateway API는 동적인 인프라 프로비저닝과 강화된 트래픽 라우트를 지원하는 API이다.\

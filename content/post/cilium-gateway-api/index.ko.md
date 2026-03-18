@@ -8,6 +8,15 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - Kubernetes
+    - Cilium
+    - Gateway API
+    - Service Mesh
+
+categories:
+    - Cilium
 ---
 
 ## 🛣️ Cilium Gateway API
