@@ -88,6 +88,7 @@ Incremental 또는 Rolling Update라고도 불린다.
 
 
 ### Canary
+광산에서 카나리아 새가 먼저 유독가스를 감지하면, 광부들이 대피하는 것에서 유래했다.  \
 조금씩만 전환하여 안전하다는 판단이 들면, 크게 전환시킨다.  
 ![Canary](canary.png)
 
@@ -98,7 +99,7 @@ Incremental 또는 Rolling Update라고도 불린다.
 
 **단점:**
 - 느린 롤아웃
-- Sticky Session 필요
+- Sticky Session 필요할 수 있음
 - 정확한 트래픽 이용에는 서비스 메시 필요
 
 

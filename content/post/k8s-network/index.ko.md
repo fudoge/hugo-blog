@@ -96,10 +96,8 @@ Pod가 하나의 논리적 호스트이기 때문이다.
 기본적으로 항상 제공된다. 클러스터 내부에만 접근 가능한 가상 IP이다.  
 즉, `Service`의 내부 IP라고 보면 된다. 
 외부에서는 접근할 수 없고, DNS를 통한 이름 기반 접근이 가능하다.  
-`kube-proxy`를 기반으로 동작한다. 
-- iptables의 경우 랜덤으로 라우팅되며, 
-- ipvs의 경우, `Round Robin`, `Least Connections`, `Destination Hasing`, `Source Hashing`, `Shortest expected delay`, `Never Queue`등이 지원된다.  
-`iptables`에서는 `netfilter`를 사용하여 시스템콜이 필요없어서 성능이 더 좋다.  
+`kube-proxy`를 기반으로 내부의 `iptables`를조작하여 동작한다.
+
 ```yaml
 spec:
   type: ClusterIP
@@ -137,7 +135,7 @@ spec:
 내부로는 `ClusterIP`를, 외부에는 로드밸런서를 설치한다.   
 사용중인 클라우드 서비스에 따른 로드밸런서(aws의 경우 nlb) 인스턴스가 생성된다.  
 Cloud Controller들 중에서 LB Controller가 존재하며, 이것이 클라우드에서 인스턴스를 생성하도록 하는 것이다.  
-기본적으로 `NodePort`를 추상화한 서비스이고, 워커 노드 인스턴스 단위로 로드밸런싱된다.  
+기본적으로 `NodePort`를 사용하기는 한다.
 ![LB with NodePort](k8s-lb.png)
 
 그러나, 클라우드의 LB의 경우, 클라우드 자체의 CNI를 사용하여, POD ip로 직접 라우팅시킬 수 있다.  
@@ -153,7 +151,7 @@ NAT를 한번 건너뛰어 더 빠르게 통신 가능하다.
 ![LB with aws vpc cni](k8s-nw-aws-vpc-cni.png)
 
 온프레미스에서는 `MetalLB`등을 사용한다.  
-온프레미스에서는 `NodePort`를 추상화해서 사용한다고 보면 되지만, 고급 CNI설정 시, Pod로 직접라우팅이 가능하다.  
+온프레미스에서도 고급 CNI설정 시, Pod로 직접라우팅이 가능하다.  
 
 ```yaml
 spec:

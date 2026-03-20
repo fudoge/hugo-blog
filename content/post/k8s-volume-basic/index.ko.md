@@ -162,7 +162,7 @@ PV의 PVC가 제거되고 나서의 옵션들이다:
 ![PV, PVC, Pod Lifecycle](k8s-vol-lifecycle.png)
 
 
-### 예시: AWS ELB 이용
+### 예시: AWS EBS 이용
 
 **pv.yaml**
 ```yaml

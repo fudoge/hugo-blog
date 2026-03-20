@@ -97,10 +97,10 @@ spec:
     image: busybox:latest
     command: ["/bin/sh", "-c", "touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600"]
     livenessProbe:
-    exec:
-      command:
-      - cat
-      - /tmp/healthy
+      exec:
+       command:
+        - cat
+        - /tmp/healthy
     initialDealySeconds: 5
     periodSeconds: 5
 ```
