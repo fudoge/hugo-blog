@@ -31,7 +31,7 @@ Docker Hub, Quay, ghcr.io, k8s.io, Public ECR 등, 여러 이미지들을 Pull �
 이를 방지하기 위해, ECR에 캐시 레지스트리르 만들고, VPC Endpoint로 비용을 줄여보고자 한다.
 
 ---
-## ECR Pull Through Cache Rule
+## 📏 ECR Pull Through Cache Rule
 
 **Pull Through Cache Rule은 직접 레지스트리를 만들지 않는다.** \
 이후, 첫 pull 요청이 오면, 이용하는 인스턴스(EC2, ECS, EKS 등)는 실제 Private Registry를 만들고, 원본 이미지를 받아오도록 요청한다. \
@@ -101,7 +101,7 @@ Pull Through Cache 레포지토리는 캐시 저장소 경로와 upstream 저장
 > 즉, `ecr-public`이라고 적으면, ECR은 `ecr-public/`이라고 인식한다.
 
 ---
-## ECR Repository Creation Template
+## 🍱 ECR Repository Creation Template
 
 ECR Repository Creation Template은 최초 푸시 시 생성, Pull through Cache, 복제 등의 작업에서 여러 구성 설정을 적용시키기 위한 미리 정의해두는 탬플릿이다. \
 Prefix로 매칭된다.
@@ -111,7 +111,7 @@ Prefix로 매칭된다.
 이미지 태그의 mutable설정, 암호화 설정, 레포지토리 정책, 태그, lifecycle policy, IAM Role할당 등을 할 수 있다.
 
 ---
-## Lifecycle Policy
+## ⏳ Lifecycle Policy
 
 Amazon ECR에서는 컨테이너 이미지의 생명 주기 관리를 하여 비용 절감이 가능하다. \
 lifecycle policy가 레포지토리에 적용되면, 
@@ -164,7 +164,7 @@ Rule은 json으로 작성되며, 아래의 포맷을 가진다:
 - 시간 기준은 항상 최신 이미지들이 남는다
 
 ---
-## VPC Endpoint
+## ✨ VPC Endpoint
 
 ### 기본적으로 필요한 VPC Endpoint들
 VPC Endpoint로 ECR에 비용 효율적으로 컨테이너를 받아올 수 있다. 
@@ -175,7 +175,7 @@ VPC Endpoint로 ECR에 비용 효율적으로 컨테이너를 받아올 수 있�
 또한, Endpoint의 ENI들에 적용할 보안그룹에서는 Ingress로 tcp 443, 즉 https를 허용해야 한다.
 
 그러나, 이들만으로는 부족한데, ECR은 Amazon S3에 이미지 레이어들을 저장하기에, S3 gateway endpoint까지 필요하다. \
-엔드포인트명은 `com.amazonaws.{region}.s3`이다. \
+엔드포인트명은 `com.amazonaws.{region}.s3`이다. 
 
 ### EKS에서 필요한 VPC Endpoint들
 이외에도, EKS를 사용한다면, 아래 표에서 더 많은 VPC Endpoint들을 고려해볼 수 있다:
@@ -193,7 +193,7 @@ VPC Endpoint로 ECR에 비용 효율적으로 컨테이너를 받아올 수 있�
 | Amazon EKS | `com.amazonaws.{region}.eks` |
 
 ---
-## Terraform 코드 예시
+## 🫟 Terraform 코드 예시
 
 ### Pull Through Cache 생성
 
