@@ -12,19 +12,20 @@ defaultContentLanguageInSubdir = true
 hasCJKLanguage = true
 
 [languages]
-    [languages.en]
-        languageCode = 'en-US'
-        languageName = 'English'
-        weight = 1
-        [languages.en.params.sidebar]
-            subtitle = 'Not just filling - overflowing'
-
     [languages.ko]
         languageCode = 'ko-KR'
         languageName = '한국어'
-        weight = 2
+        weight = 1
         [languages.ko.params.sidebar]
             subtitle = '넘치게 채우기'
+
+    [languages.en]
+        languageCode = 'en-US'
+        languageName = 'English'
+        weight = 2
+        [languages.en.params.sidebar]
+            subtitle = 'Not just filling - overflowing'
+
 
 
 [pagination]
