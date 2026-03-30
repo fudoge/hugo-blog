@@ -1,0 +1,19 @@
+{
+  "plugins": ["prettier-plugin-hugo-post", "prettier-plugin-go-template"],
+  "overrides": [
+    {
+      "files": ["content/**/*.md", "*.md"],
+      "options": {
+        "parser": "hugo-post",
+        "printWidth": 100,
+        "proseWrap": "preserve"
+      }
+    },
+    {
+      "files": ["layouts/**/*.html", "*.html"],
+      "options": {
+        "parser": "go-template"
+      }
+    }
+  ]
+}
