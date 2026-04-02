@@ -154,7 +154,7 @@ Rule은 json으로 작성되며, 아래의 포맷을 가진다:
 } 
 ```
 
-여러 예제들은 [여기](https://docs.aws.amazon.com/AmazonECR/latest/userguide/lifecycle_policy_examples.html)]에서 확인가능하다.
+여러 예제들은 [여기](https://docs.aws.amazon.com/AmazonECR/latest/userguide/lifecycle_policy_examples.html)에서 확인가능하다.
 
 여러 주의할 점들이 있다:
 - `tagPatternList`와 `tagPrefixList`는 같이 사용할 수 없다
@@ -162,6 +162,9 @@ Rule은 json으로 작성되며, 아래의 포맷을 가진다:
 예를 들어, `tagPrefixList = ["prod", "stable"]`이면, 해당 이미지는 `prod`로 시작하는 태그와 `stable`로 시작하는 태그 모두 있어야 한다.
 - `untagged` 이미지들에 대한 정책은 하나의 `storageClass`만을 선택해야 한다.
 - 시간 기준은 항상 최신 이미지들이 남는다
+- `any`의 경우, 정책 리스트에서 맨 아래에 있어야 한다.
+- `sinceImagePulled`는 바로 `expire`될 수 없다. \
+대신, `transition`으로 `archive` stroageClass로 전이시킨 뒤, 이후 `expire`시키는 패턴을 사용할 수 있다.
 
 ---
 ## ✨ VPC Endpoint
@@ -269,6 +272,12 @@ resource "aws_ecr_pull_through_cache_rule" "cache" {
   upstream_registry_url = each.value.upstream_registry_url
 
   credential_arn = each.value.needs_auth ? aws_secretsmanager_secret.cache_cred[each.key].arn : null
+
+  # 실제 version이 생긴 이후에 생성되어야 하므로 depends_on을 넣음
+  depends_on = [
+    aws_secretsmanager_secret_version.cache_cred
+  ]
+
 }
 
 # Template
@@ -293,18 +302,18 @@ resource "aws_ecr_repository_creation_template" "cache_template" {
   }
 
   # 생명주기 정책
-  # 1. tagged 이미지: 마지막으로 pull된지 14일이 지나면 정리
-  # 2. Untagged 이미지: push된지 5일 지나면 정리
+  # 1. Untagged 이미지: push된지 5일 지나면 정리(expire)
+  # 2. tagged 이미지: 마지막으로 pull된지 30일이 지나면 archive, 180이후 정리
   lifecycle_policy = jsonencode({
     rules = [
       {
         rulePriority = 1
-        description  = "Expire tagged images older than 14 days"
+        description  = "Expire untagged images older than 5 days"
         selection = {
-          tagStatus   = "tagged"
-          countType   = "sinceImagePulled"
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
           countUnit   = "days"
-          countNumber = 14
+          countNumber = 5
         }
         action = {
           type = "expire"
@@ -312,12 +321,29 @@ resource "aws_ecr_repository_creation_template" "cache_template" {
       },
       {
         rulePriority = 2
-        description  = "Expire untagged images older than 5 days"
+        description  = "Archive images not pulled for 30 days"
         selection = {
-          tagStatus   = "untagged"
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          countNumber = 5
+          tagStatus      = "tagged"
+          tagPatternList = ["*"]
+          countType      = "sinceImagePulled"
+          countUnit      = "days"
+          countNumber    = 30
+        }
+        action = {
+          type               = "transition"
+          targetStorageClass = "archive"
+        }
+      },
+      {
+        rulePriority = 3
+        description  = "Expire archived images after 180 days in archive"
+        selection = {
+          tagStatus      = "tagged"
+          tagPatternList = ["*"]
+          storageClass   = "archive"
+          countType      = "sinceImageTransitioned"
+          countUnit      = "days"
+          countNumber    = 180
         }
         action = {
           type = "expire"
