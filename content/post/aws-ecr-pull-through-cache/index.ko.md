@@ -157,6 +157,7 @@ Rule은 json으로 작성되며, 아래의 포맷을 가진다:
 여러 예제들은 [여기](https://docs.aws.amazon.com/AmazonECR/latest/userguide/lifecycle_policy_examples.html)에서 확인가능하다.
 
 여러 주의할 점들이 있다:
+- `tagPatternList` 또는 `tagPrefixList`는 `tagged`에서 반드시 사용되어야 한다.
 - `tagPatternList`와 `tagPrefixList`는 같이 사용할 수 없다
 - `tagPatternList`와 `tagPrefixList`의 값들은 AND조건으로 맞아야 한다. \
 예를 들어, `tagPrefixList = ["prod", "stable"]`이면, 해당 이미지는 `prod`로 시작하는 태그와 `stable`로 시작하는 태그 모두 있어야 한다.
