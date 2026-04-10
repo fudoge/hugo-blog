@@ -9,6 +9,12 @@ license:
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - AWS
+    - Terraform
+categories:
+    - AWS
 ---
 
 ## 🔑 What is AWS Security Token Service (STS)? 
