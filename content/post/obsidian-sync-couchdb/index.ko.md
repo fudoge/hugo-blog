@@ -484,7 +484,7 @@ Dashboard -> DNS에서, MagicDNS 와 HTTPS Certificates를 enable해준다.
 ## 👮 Caddy 설치
 
 **Caddy** 는 리버스 프록시로도 활용될 수 있는 간단한 웹 서버이다. \
-Tailscale과 연계가 특히 좋은데, CouchDB는 REST API를 지원하여 그의 앞단에서 동작할 것이다.
+Tailscale과 연계가 특히 좋은데, CouchDB는 REST API를 지원하여, Caddy는 CouchDB의 앞단에서 동작할 것이다.
 
 [여기](https://caddyserver.com/docs/install#debian-ubuntu-raspbian)에서 Caddy를 설치할 수 있다.
 
@@ -574,7 +574,7 @@ obsidian://setuplivesync?settings=....
 3. **Device Setup Method** 에서, **Use a Setup URI** 를 고른다.(모바일에서 QR이 안되던데, 가능하면 QR을 써도 될거같다.)
    - passphrase와 URI(`obsidian://setuplivesync?settings=...`)를 입력한다.
 4. **"My remote server is already set up. I want to join this device"** 를 고른다.
-5. **"This Vault is empty, or contains only new files that are not on the server"**를 고른다.
+5. **"This Vault is empty, or contains only new files that are not on the server"** 를 고른다.
 6. 나머지 단계를 적절하게 진행한다.
 7. Without saving으로 앱을 재실행한다.
 

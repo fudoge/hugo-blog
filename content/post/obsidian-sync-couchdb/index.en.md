@@ -484,7 +484,7 @@ In Dashboard -> DNS, enable MagicDNS and HTTPS Certificates.
 ## 👮 Setup Caddy
 
 **Caddy** is a simple web server that can also act as a reverse-proxy. \
-It integrates especially well with Tailscale, which makes it a great fit fot this setup.
+It integrates especially well with Tailscale, which makes it a great fit fot this setup 
 
 You can install Caddy [here](https://caddyserver.com/docs/install#debian-ubuntu-raspbian).
 
