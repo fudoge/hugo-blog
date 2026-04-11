@@ -25,8 +25,8 @@ categories:
 - 불필요한 기능들이 많음
 - 로딩이 김
 
-Obsidian은 더 가볍고, 나의 사용에 적절해서 사용하고 있다. \
-그리고 더 이쁘다
+Obsidian은 더 가볍고 단순해서 계속 사용하게된다. \
+(그리고 더 이쁘다)
 
 ### Obsidian의 동기화 옵션들
 
@@ -59,14 +59,14 @@ Obsidian은 더 가볍고, 나의 사용에 적절해서 사용하고 있다. \
 ---
 ## 🏗️ LXC Container 프로비저닝하기
 
-우선, **LXC Container** 를 **Proxmox** Cluster에서 만들어줄 것이다. \
+우선, **LXC Container** 를 **Proxmox** Cluster에서 만들어줄 것이다. 
 
 선언적 환경 구성을 위해, **Terraform** 으로 설치할 것이며, provider는 [bgp/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest)를 이용한다.
 
 ### Debian 13 LXC Image 다운로드
 
 Terraform을 쓰긴 하지만, `proxmox_download_file`리소스가 현재 LXC이미지를 받을 때, 체크섬 확인에서 오류가 나서 매번 재설치를 진행한다. \
-대신, 이미지는 수동 설치를 하자.
+대신, 이미지는 수동 설치를 하는 것이 좋을 듯 하다.
 
 우선. SSH로 Proxmox 클러스터에 접속한다:
 ```bash
@@ -594,7 +594,7 @@ LiveSync 프리셋을 이용해서, 실시간 동기화 기능을 켜고 사용 
 그러나, 보조 백업수단으로는 꽤 괜찮은데, Git플러그인에서 주기적 푸시를 지원하며, 이는 꽤 가볍기 때문이다. \
 즉, 가벼운 백업을 짧은 주기로 계속 emit하는거라 꽤 괜찮다. \
 또한, 모든 디바이스에서 설치할 이유 없이, 메인 디바이스(컴퓨터, 노트북)에서만 추가로 Git 플러그인을 설치해서 푸시하면 된다. \
-`.git`폴더는 LiveSync에서 자동으로 동기화 무시되므로, CouchDB에도 부담이 덜하고, 동기화 문제도 할 필요 없다. 
+`.git`폴더는 LiveSync에서 자동으로 동기화 무시되므로, CouchDB에도 부담이 덜하고, 동기화 문제도 걱정 할 필요 없다. 
 
 ### Cloud Object Storage
 

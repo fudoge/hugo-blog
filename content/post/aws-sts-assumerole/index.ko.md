@@ -37,7 +37,7 @@ AWS Security Token Service (STS)는 IAM user 또는 role에 단기자격증명�
 ![STS-AssumeRole](sts.png)
 
 1. 사용자, 애플리케이션, 또는 AWS 서비스가 IAM Role을 맡도록 요청을 보낸다.
-2. AWS는 Role의 **신뢰 정책(trust policy)**으로 해당 요청자가 그 Role을 받는 것이 허용되었는지 검사한다.
+2. AWS는 Role의 **신뢰 정책(trust policy)** 으로 해당 요청자가 그 Role을 받는 것이 허용되었는지 검사한다.
 3. 만약 허용된다면, STS는 다음의 임시 자격증명 정보를 제공한다:
     - Access key ID
     - Secret access key
