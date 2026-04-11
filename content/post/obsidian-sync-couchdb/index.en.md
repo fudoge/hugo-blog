@@ -402,7 +402,7 @@ ssh root@<your-container-ip>
 ---
 ## 🪏 Settingup CouchDB + LiveSync
 
-### Download CouchDB
+### Install CouchDB
 
 First, update the package manager and upgrade installed packages. \
 Then, install the dependencies required to follow the CouchDB installation instructions:
