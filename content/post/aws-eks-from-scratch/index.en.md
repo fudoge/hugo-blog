@@ -1,14 +1,21 @@
 ---
-title: "Building Amazon EKS without official modules"
-slug: 
-description: 
+title: "Building Amazon EKS with Custom Terraform Modules"
+slug: building-amazon-eks-with-custom-terraform-modules
+description: My approach to provisioning Amazon EKS with custom Terraform modules.
 date: 2026-04-14T23:43:27+09:00
-image: 
+image: modules.png
 math: 
 license: 
 hidden: false
 comments: true
 draft: false
+
+tags:
+    - AWS
+    - Terraform
+categories:
+    - AWS
+    - Terraform
 ---
 
 ## 🌯 Introduction
@@ -20,6 +27,9 @@ At First, I considered using [terraform-aws-modules/eks/aws](https://registry.te
 However, it felt too abstract for my use case, and the large number of input variables made it harder for me to understnad what was actually being created. \
 Instead of relying on a highly abstracted module, I decided to build the EKS cluster using my own smaller Terraform modules. \
 This approach helped me to understand each component more clearly and gave me more control over the infrastructure design. 
+
+The diagram below shows the dependencies of modules.
+![Module dependencies](modules.png)
 
 ## ❓ What is Amazon EKS?
 
@@ -70,6 +80,10 @@ In `access_config`, I set `authentication_mode = "API"` so that cluster access c
 
 The module also creates an IAM role for the EKS control plane and attaches the required AWS-managed policy. \
 This role allows EKS to interact with other AWS services as part of cluster operation.
+
+By default, **EKS cluster encrypts secrets at rest.** \
+If you want to make secrets to be encrypted with **CMK(Customer Managed Key)** , you can use `encryption_config` block. \
+Visit [here](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#encryption_config) for more informations.
 
 ```hcl
 resource "aws_security_group" "eks_control_plane_access" {
@@ -213,7 +227,8 @@ variable "enabled_cluster_log_types" {
 
 ### `outputs.tf`
 
-By default, 
+By default, Cluster security group is created by default. \
+For more informations, see [here](https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html) .
 
 ```hcl
 output "cluster_name" {
@@ -249,10 +264,11 @@ Newer model is preferred because it fits IaC-based infrastructure management muc
 Granting access through assumed IAM roles rather than IAM users is also recommended. \
 In practice, this means an engineer first assumes a role and then uses that role to access the cluster. \
 This is a better fit for operational environments because roles provide temporary credentials, while IAM users are usually tied to long-lived credentials. \
-From both a security and management perspective, using roles is the more natural approach.
+From both a security and management perspective, using roles is the more natural approach. \
+For an IAM user to assume an IAM role, the user needs permission to call `sts:AssumeRole` on the role, and the role’s trust policy must allow that user.
 
-Another important point is that EKS access entries do not replace Kubernetes RBAC. \
-Access entries determine how an IAM principal can access the cluster, while Kubernetes RBAC still determines what that principal is allowed to do inside the cluster. \
+Another important point is that EKS access scope in access policy association do not replace Kubernetes RBAC. \
+Access scope is just a simple access-control scope which is managed by AWS, while Kubernetes RBAC still works in cluster itself. \
 These two layers can work together. \
 In this module, I can optionally assign `kubernetes_groups` to the principal so that the access entry can integrate with native Kubernetes RBAC when more fine-grained authorization is needed. \
 For more information, visit [here](https://www.eksworkshop.com/docs/security/cluster-access-management/kubernetes-rbac/)
@@ -268,7 +284,6 @@ After that, `aws_eks_access_policy_association` resources are created from a map
 
 Each policy association also defines its access scope. \
 Depending on the configuration, access can be granted either at the cluster level or only for specific namespaces. \
-This makes the module flexible enough to represent both broad administrative access and more limited namespace-scoped access.
 
 ```hcl
 resource "aws_eks_access_entry" "access" {
@@ -333,8 +348,7 @@ variable "eks_access_policy_association" {
 EKS managed node groups automate the provisioning and lifecycle management of worker nodes.
 
 This module has more input variables than some of the earlier modules because node groups tend to vary a lot depending on workload requirements. \
-Instance type, capacity model, scaling limits, labels, taints, and disk size can all change depending on how the cluster is intended to be used. \
-Rather than hiding those differences behind heavy abstraction, I exposed them directly in the module interface.
+Instance type, capacity model, scaling limits, labels, taints, and disk size can all change depending on how the cluster is intended to be used. 
 
 Worker nodes also need a role with the required AWS permissoins. \
 At minimum, the nodes need policies such as `AmazonEKSWorkerNodePolicy` and `AmazonEC2ContainerRegistryPullOnly` so that they can join the cluster and pull container images from Amazon ECR. 
@@ -347,7 +361,7 @@ I exposed Kubernetes-specific scheduling options through `labels` and `taints`. 
 These settings are important when different workloads need to be separated across different groups of nodes. \
 For example, some nodes may be dedicated to system workloads, while others may be reserved for specific applications or cost-optimized Spot workloads.
 
-Another detail is the lifecycle block ignoring changes to `desired_size`. 
+Another detail is the lifecycle block ignoring changes to `desired_size`. \
 I added this because the desired number of nodes may change dynamically during operation, and I did not want Terraform to constantly treat that runtime scaling state as drift.
 
 
@@ -552,7 +566,8 @@ In other words, different applications in the same cluster can use different IAM
 ### `main.tf`
 First, this module creates IAM role that can be assumed by EKS pods. \
 Then it attaches the IAM policy that defines what the workload is allowed to do in AWS. \
-Finally, it creates the pod identity association that connects the IAM role to a specific Kubernetes service account in a specific namespace.
+Finally, it creates the pod identity association that connects the IAM role to a specific Kubernetes service account in a specific namespace. \
+Pod identity agent is deployed by daemonset, providing pods to get its credentials from IAM role.
 
 ```hcl
 resource "aws_iam_role" "pod" {
@@ -1085,15 +1100,18 @@ Some common examples are:
 - **cert-manager** for TLS certificate management
 - **AWS Load Balancer Controller** for integrating Kubernetes services with AWS load balancers
 - **Karpenter** for node autoscaling
-- **Gateway API CRD** for newer north-south traffic control
+- **Gateway API CRD** for newer north-south traffic control management
+- **Observability Stack**
+- and so on
 
-You can also consider [AWS EKS Capabilities](https://docs.aws.amazon.com/eks/latest/userguide/capabilities.html). \
+You can also consider [AWS EKS Capabilities](https://docs.aws.amazon.com/eks/latest/userguide/capabilities.html). 
 
 ---
 ## 📚 References
 
 - [Terraform Registry - Hashicorp/AWS](https://registry.terraform.io/providers/hashicorp/aws/latest)
 - [AWS Documents - What is EKS](https://docs.amazonaws.cn/en_us/eks/latest/userguide/what-is-eks.html)
+- [AWS Documents - Default envelope encryption for all Kubernetes API Data](https://docs.aws.amazon.com/eks/latest/userguide/envelope-encryption.html)
 - [AWS Documents - Access Entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html)
 - [AWS Documents - Managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
 - [AWS Documents - Create node role](https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html)
