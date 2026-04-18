@@ -10,7 +10,8 @@ comments: true
 draft: false
 
 categories:
-    - Certifications
+    - Certification
+    - AWS
 
 tags:
     - AWS

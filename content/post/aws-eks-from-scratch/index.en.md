@@ -13,9 +13,11 @@ draft: false
 tags:
     - AWS
     - Terraform
+    - Kubernetes
 categories:
     - AWS
     - Terraform
+    - Kubernetes
 ---
 
 ## 🌯 Introduction
