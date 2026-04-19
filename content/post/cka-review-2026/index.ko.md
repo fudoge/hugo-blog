@@ -2,7 +2,7 @@
 title: "CKA(Certified Kubernetes Administrator) 후기 (2026)"
 slug: cka-review-2026
 description: CKA 응시 및 합격후기(2026년 4월)와 준비 과정, 최신 정보, 팁.
-date: 2026-04-19T15:10:58+09:00
+date: 2026-04-19T09:30:00+09:00
 image: certification.png
 math: 
 license: 
