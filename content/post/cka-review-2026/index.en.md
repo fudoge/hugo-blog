@@ -3,7 +3,7 @@ title: "CKA Review: Preparation Strategy, Exam Experience, and Takeaways (2026 V
 slug: cka-review-2026
 description: A concise review of my CKA journey covering preparation time, recommended materials, the remote exam environment, useful tips, and lessons learned after certification.
 date: 2026-04-18T15:10:55+09:00
-image: 
+image: certification.png
 math: 
 license: 
 hidden: false
