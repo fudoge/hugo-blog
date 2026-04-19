@@ -109,6 +109,19 @@ I personally just used the terminal and Vim, but if you prefer a VS Code–style
 ---
 ## 🚀 Result
 
+![Exam result](result.png)
+
+24 hours later, the result came out! \
+I rememvered that I had used the wrong namespace on the exam, so I expected to lose a significant number of points because of it. \
+Still, since I had already scored above the passing mark on Killer.sh, I was not too worried about whether I would pass.
+I ended up with a score of 76%, which honestly did not quite meet my own expectations. \
+That said, what matters most is that I passed, so I decided to put my disappointment behind me. \
+(And anyway, I have to take it again in two years 😂)
+
+![Certification](certification.png)
+The certificate can be downloaded as a PDF. \
+You can also claim an Open Badge on Credly.
+
 ---
 ## 🍕 Latest informations (April 2026) and tips
 
