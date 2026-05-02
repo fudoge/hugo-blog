@@ -94,7 +94,7 @@ Karpenter는 Kubernetes가 부적절한 클러스터 스펙으로 pod를 스케�
 6. Finalizer제거
 7. 노드 제거 완료
 
-> **왜 Disruption이 두 단계로 나뉘는가**
+> **왜 Disruption이 두 단계로 나뉘는가** \
 > Karpenter-managed노드가 여러 방법으로 제거될 수 있는데(ex. `kubectl delete node <node-name>`), \
 > 그러한 방식들의 제거들 모두 제거 과정에서 Graceful Shutdown이 필요하여 Termination 단계는 다른 곳에서도 재사용되어야 한다. \
 > 그리고 이것이 `karpenter.sh/disrupted:NoSchedule` taint를 붙이는 과정이 둘 다 있는 이유이다.
@@ -103,7 +103,7 @@ Karpenter는 Kubernetes가 부적절한 클러스터 스펙으로 pod를 스케�
 
 ![Interruption](interruption.png)
 
-Interruption은 AWS 이벤트에 의한 노드 종료이다.
+Interruption은 AWS 이벤트에 의한 노드 종료이다. \
 이벤트가 나면, Karpenter는 영향을 받는 노드의 제거작업을 실시한다.
 
 다음의 이벤트들이 잡힐 수 있다:
@@ -163,7 +163,7 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --wait
 ```
 
-주요 파라미터를 아래와 같다:
+주요 파라미터는 아래와 같다:
 - `settings.clusterName`: EKS cluster의 이름
 - `settings.interruptionQueue`: 인터럽션 핸들링을 위한 SQS queue.
 - `settings.enableZonalShift`: Zonal shift를 활성화
@@ -174,7 +174,7 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
 ### NodePool
 
 아래는 간단한 `NodePool`예시이다. \
-Karpenter를 사용하면 `NodePool`과 그에 대응되는 `EC2NodeClass`와 같은 `NodeClass`들을 구독해야 한다.
+Karpenter를 사용하면 `NodePool`과 그에 대응되는 `EC2NodeClass`와 같은 `NodeClass`들을 참조해야 한다.
 
 ```yaml
 apiVersion: karpenter.sh/v1
@@ -275,7 +275,7 @@ spec:
 ## 🧑‍🔬 노드 확장 테스트
 
 Karpenter를 테스트하기 위해, 워크로드들을 스케줄시켜보자. \
-아래명령어는 cpu "500m"을 요구하는 `nginx` deployment의 Pod수를 10개 띄우는 명령이다.
+아래명령어는 cpu "500m"을 요구하는 `nginx` deployment의 replica를 10개 띄우는 명령이다.
 
 ```bash
 cat <<EOF | kubectl apply -f -
