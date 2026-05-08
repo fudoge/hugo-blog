@@ -81,7 +81,7 @@ X-Forwarded-For: 203.0.113.42, 10.0.0.5, 10.0.0.10
 `X-Envoy-External-Address`에 실제 클라이언트 주소만 따로 떼어서 준다.
 
 예를 들면, 앞단에 클라우드 로드 밸런서가 붙어있다면, `trusted hops=1`이어야 한다. \
-이외 네트워크 구성에 따라 신뢰할 수 있는 앞단의 홉 수를 조정할 수 있다. \
+이외 네트워크 구성에 따라 신뢰할 수 있는 앞단의 홉 수를 조정할 수 있다. 
 
 홉의 수는 helm values에서 `gatewayAPI.xffNumTrustedHops`로 설정할 수 있다.
 
@@ -110,7 +110,7 @@ Service 오브젝트는 Client IP를 가시성에 관련된 필드가 하나 있
 
 ### TLS Passthrough 및 Source IP 가시성
 Ingress와 Gateway API는 TLS Passthrough를 지원한다. \
-TLS Passthrough에서는 Envoy가 TLS를 종료하지 않고 TCP 프록시로 동작하므로, HTTP 헤더인 X-Forwarded-For를 추가할 수 없다. \
+TLS Passthrough에서는 Envoy가 TLS를 종료하지 않고 TCP 프록시로 동작하므로, HTTP 헤더인 X-Forwarded-For를 추가할 수 없다. 
 
 Envoy는 TLS handshake의 `ClientHello`에 포함된 SNI(Server Name Indication) 를 보고 어떤 backend로 보낼지 결정한다. \
 이후 backend와 새로운 TCP 연결을 만들어 TLS 스트림을 그대로 전달하기 때문에, backend 입장에서는 source IP가 원래 클라이언트가 아니라 Envoy IP로 보이게 된다.
@@ -120,7 +120,7 @@ Envoy는 TLS handshake의 `ClientHello`에 포함된 SNI(Server Name Indication)
 Host 네트워크에 직접 연결하도록 노출할 수 있다. \
 LoadBalancer가 불가능한 상황에서 외부에 노출할 때 유용하다.
 
-helm values에 아래와오 같이 설정하면 된다:
+helm values에 아래와 같이 설정하면 된다:
 ```YAML
 gatewayAPI:
 	enabled: true

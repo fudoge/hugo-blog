@@ -33,10 +33,10 @@ Karpenter는 다양한 이점이 있다:
 - **Automatic node scaling**: 스케줄되지 못한 pod가 있으면, Karpenter는 새로운 노드를 프로비저닝하여 pod가 스케줄링될 수 있도록 한다. \
 또한 더 이상 쓰이지 않는 노드 등을 정리하기도 한다.
 - **Cost efficiency**: Karpenter는 pod의 자원 요구량과 노드의 자원들을 종합하여 가장 비용 효율적인 노드 사용으로 맞춘다. (bin-packing)
-- **Speed**: Karpenter는 전통적인 EKS에서의 오토스케일 방식은 Cluster Autoscaler보다 빠르다.
+- **Speed**: Karpenter는 전통적인 EKS에서의 오토스케일 방식인 Cluster Autoscaler보다 빠르다.
 
 EKS에서 Auto Mode를 사용하면, AWS가 Karpenter를 자동으로 관리해준다. \
-그러나, EKS AUto Mode자체로 추가 비용이 든다는 것을 알아야 한다.
+그러나, EKS Auto Mode자체로 추가 비용이 든다는 것을 알아야 한다.
 
 ---
 ## 🚀 동작 방식
@@ -80,7 +80,7 @@ Karpenter는 Kubernetes가 부적절한 클러스터 스펙으로 pod를 스케�
 1. Pod들이 종료될 수 있는지 확인
 2. Disruption budget을 확인(`NodePool`의 `spec`에 있는데, 너무 자주 제거되지 않기 위한 제한이다.)
 3. 스케줄링 시뮬레이션으로 pod들이 재배치될 수 있는지 예측
-4. `karpenter.sh/disrupted:NoSchedule` taing 를 추가하여 새로운 스케줄링이 되는것을 차단
+4. `karpenter.sh/disrupted:NoSchedule` taint 를 추가하여 새로운 스케줄링이 되는것을 차단
 5. 대체 노드 필요시, `NodeClaim`을 만들어서 추가
 6. 노드 제거. Termination Controller가 이후 흐름을 제어
 
@@ -241,7 +241,7 @@ spec:
 
 아래는 `EC2NodeClass` 예시이다.
 
-`EC2NodeClass`는 IAM role, AMi selection, Subnet, Security Group, ec2 tag등의 설정들이 담겨있다.
+`EC2NodeClass`는 IAM role, AMI selection, Subnet, Security Group, ec2 tag등의 설정들이 담겨있다.
 
 ```yaml
 apiVersion: karpenter.k8s.aws/v1
