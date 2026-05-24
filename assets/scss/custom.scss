@@ -2,6 +2,11 @@
 // 1. 코드 블록 레이아웃 및 디자인
 // =============================
 $codeblock-max-height: 25em;
+$code-font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+:root {
+  --code-font-family: #{$code-font-family};
+}
 
 .article-content .highlight {
   padding: 30px 1.25rem 0.75rem 0.9rem;
@@ -27,6 +32,14 @@ $codeblock-max-height: 25em;
   font-size: 14px;
   font-family: var(--code-font-family);
   overflow: visible !important;
+  font-variant-ligatures: normal;
+  font-feature-settings: "calt" 1;
+}
+
+.article-content code,
+.article-content kbd,
+.article-content samp {
+  font-family: var(--code-font-family);
 }
 
 // =============================
