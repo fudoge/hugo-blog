@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
 Sitemap: https://blog.chaewoon.work/sitemap.xml
-Sitemap: https://blog.chaewoon.work/en/sitemap.xml
-Sitemap: https://blog.chaewoon.work//ko/sitemap.xml

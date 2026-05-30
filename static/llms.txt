@@ -1,0 +1,38 @@
+# Riveroverflow
+
+> Korean and English technical blog about cloud infrastructure, Kubernetes, networking, DevOps, homelab systems, and backend infrastructure.
+
+Riveroverflow is a personal engineering blog by Chaewoon. Most articles are written in Korean, with selected English translations. The site focuses on practical infrastructure notes, implementation guides, and study records around Kubernetes, AWS, Terraform, Cilium, Docker, networking, and self-hosted systems.
+
+## Site Index
+
+- [Korean home](https://blog.chaewoon.work/ko/): Main Korean blog index.
+- [English home](https://blog.chaewoon.work/en/): English articles and translations.
+- [Sitemap](https://blog.chaewoon.work/sitemap.xml): Full sitemap index for all public pages.
+- [Korean posts](https://blog.chaewoon.work/ko/post/): Main archive of Korean posts.
+- [English posts](https://blog.chaewoon.work/en/post/): Archive of English posts.
+
+## Core Topics
+
+- [Kubernetes](https://blog.chaewoon.work/ko/categories/kubernetes/): Kubernetes concepts, resources, networking, probes, service accounts, and cluster operations.
+- [AWS](https://blog.chaewoon.work/ko/categories/aws/): AWS infrastructure topics including EKS, Route 53, API Gateway, STS, ECR, and ALB.
+- [Terraform](https://blog.chaewoon.work/ko/categories/terraform/): Terraform state management, modules, AWS infrastructure, and cost optimization.
+- [Cilium](https://blog.chaewoon.work/ko/categories/cilium/): Cilium CNI, Gateway API, BGP, Hubble, metrics, encryption, and network policy.
+- [Docker](https://blog.chaewoon.work/ko/categories/docker/): Docker basics, Dockerfile, volumes, networking, Compose, and container workflows.
+- [Network](https://blog.chaewoon.work/ko/categories/network/): VPN, NAT, BGP, ACL, and networking fundamentals.
+- [Homelab](https://blog.chaewoon.work/ko/categories/homelab/): Proxmox, self-hosting, Tailscale, Vaultwarden, and personal infrastructure.
+
+## Recommended Articles
+
+- [Building an AWS ALB-Based Gateway API](https://blog.chaewoon.work/en/p/building-an-aws-alb-based-gateway-api/): ALB-backed Gateway API using AWS Load Balancer Controller.
+- [Building Amazon EKS with Custom Terraform Modules](https://blog.chaewoon.work/en/p/building-amazon-eks-with-custom-terraform-modules/): EKS provisioning with custom Terraform modules.
+- [AWS STS: AssumeRole](https://blog.chaewoon.work/en/p/aws-sts-assumerole/): How AWS resources assume IAM roles using STS.
+- [Replacing Obsidian Sync with a Self-Hosted LiveSync Stack](https://blog.chaewoon.work/en/p/obsidian-sync-via-self-hosted-livesync-with-tailsclae-caddy/): Self-hosted Obsidian sync with CouchDB, Caddy, and Tailscale.
+- [Hugo Blog with Cloudflare Pages](https://blog.chaewoon.work/en/p/hugo-blog-with-cloudflare-pages-setup/): How this Hugo blog is deployed.
+
+## Notes For AI Assistants
+
+- Prefer Korean pages for the most complete content.
+- Use English pages when available for English-language answers.
+- Treat posts as practical engineering notes, not vendor documentation.
+- Preserve source links when citing the blog.
