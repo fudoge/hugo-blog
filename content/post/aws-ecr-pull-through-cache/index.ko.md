@@ -182,7 +182,9 @@ VPC Endpoint로 ECR에 비용 효율적으로 컨테이너를 받아올 수 있�
 엔드포인트명은 `com.amazonaws.{region}.s3`이다. 
 
 ### EKS에서 필요한 VPC Endpoint들
-이외에도, EKS를 사용한다면, 아래 표에서 더 많은 VPC Endpoint들을 고려해볼 수 있다:
+이외에도, EKS를 사용한다면, 아래 표에서 더 많은 VPC Endpoint들을 고려해볼 수 있다: \
+
+대신, 이들은 기본적으로 생기는 추가 비용이 꽤 부담될 수 있으므로, 정말 private한 트래픽이 중요한 경우에만 사용해야 한다.
 
 | Service | Endpoint |
 | --- | --- |
