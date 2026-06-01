@@ -79,7 +79,7 @@ API를 통해 명령의 실행 등을 자동화하여, 실패 시에 이전의 �
 ![Kubernetes Architecture](k8s-architecture.png)
 
 ### Control Plane
-컨테이너 인프라의 추상화를 제공하는 **중앙 관리 호스트** 이다.  
+컨테이너 인프라의 추상화를 제공하는 **중앙 관리 호스트** 이다.  \
 구성요소는 아래와 같다:
 - `API-Server`: 외부로부터의 요청을 받고 각 `Worker Node`들과 통신하며 실제 요청을 실행하는 주체이다.  
 - `Etcd`: **선언된 상태(Desired State)** 들과 현재의 클러스터 내부의 상태가 저장된다.  
@@ -120,6 +120,6 @@ CAP 중 CP 시스템으로, **Consistency**를 유지하고, **Partition toleran
 ---
 ## 🖋️ 마무리
 
-서비스 인프라를 추상화한 컨테이너 오케스트레이션 솔루션인 쿠버네티스는 Control Plane과 Worker Node로 구성되며,  
-**Control Plane**은 외/내부와 통신하며 클러스터를 지휘하고, **Worker Node**는 실제로 애플리케이션을 실행한다.  
+서비스 인프라를 추상화한 컨테이너 오케스트레이션 솔루션인 쿠버네티스는 Control Plane과 Worker Node로 구성되며, \
+**Control Plane**은 외/내부와 통신하며 클러스터를 지휘하고, **Worker Node**는 실제로 애플리케이션을 실행한다.  \
 Control Plane의 `API-Server` 및 `Etcd`의 고갸용성을 위해, Control Plane은 수평적 확장이 가능하다.  

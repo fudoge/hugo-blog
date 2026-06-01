@@ -166,7 +166,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.93.0"
+      version = "0.107.0"
     }
   }
 }
@@ -415,6 +415,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
 
   cpu {
     cores = var.cpu_cores
+    type = "x86-64-v2-AES"
   }
   memory {
     dedicated = var.memory
@@ -430,10 +431,6 @@ resource "proxmox_virtual_environment_vm" "vm" {
   initialization {
     datastore_id      = var.datastore_id
     user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
-    user_account {
-      username = var.username
-      keys     = var.ssh_keys
-    }
 
     dynamic "ip_config" {
       for_each = var.networks
@@ -459,15 +456,15 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
 }
 ```
 
-Proxmox는 기본적으로 Shutdown, Reboot등을  ACPI로 제어하여, VM안에서 qemu-guest-agent가 필요하지 않다.
-그러나, 간혹 통하지 않는 VM이 있다고 한다.
-이러면 destroy시 무한로딩이 걸릴 수 있다.
+Proxmox는 기본적으로 Shutdown, Reboot등을 ACPI로 제어하여, VM안에서 qemu-guest-agent가 필요하지 않다. \
+그러나, 간혹 통하지 않는 VM이 있다고 한다. \
+이러면 destroy시 무한로딩이 걸릴 수 있다. \
 그래서, qemu-guest-agent를 활성화시키는 것을 보장하기로 약속하는 플래그로 `agent.enabled = true`를 설정한다.
 
-단, qemu-guest-agent가 설치되어야 하는데, 대부분의 클라우드 이미지에는 없을 것이다.
+단, qemu-guest-agent가 설치되어야 하는데, 대부분의 클라우드 이미지에는 없을 것이다. \
 그래서, cloud-init을 통해 qemu-geust-agent를 설치해줘야 한다.
 
-이 vm은 template vm으로부터 vm을 클론하고, 입력받은 스펙대로 새로 오버라이드하며, cloud-init을 이식해준다.
+이 vm은 template vm으로부터 vm을 클론하고, 입력받은 스펙대로 새로 오버라이드하며, cloud-init을 이식해준다. \
 cloud-init데이터 또한 변수처리하여 유연하게 받을 수 있도록 세팅해줬다.
 
 #### outputs.tf
@@ -507,8 +504,9 @@ tofu apply
 ---
 ## 🐣 탬플릿 생성
 
-이제, 모듈을 참조해서 자원을 만들어보자.
-Ubuntu 24.04 LTS 클라우드 이미지를 기반으로 탬플릿을 생성해준다.
+이제, 모듈을 참조해서 자원을 만들어보자. \
+Ubuntu 26.04 LTS 클라우드 이미지를 기반으로 탬플릿을 생성해준다. \
+글 작성 시점과 cldou image URL이 달라질 수 있으니, 클라우드 이미지URL은 새로 찾는 것을 권장한다.
 
 ```hcl
 # 01.templates/main.tf
@@ -518,7 +516,7 @@ module "ubuntu_template" {
   template_name = "ubuntu-template"
   ve_node_name  = "pve-01"
   datastore_id  = "local"
-  image_url     = "https://cloud-images.ubuntu.com/noble/20251113/noble-server-cloudimg-amd64.img"
+  image_url     = "https://cloud-images.ubuntu.com/resolute/20260520/resolute-server-cloudimg-amd64.img"
 }
 ```
 
@@ -653,11 +651,11 @@ tofu init
 ---
 ## 🐥 k8s노드 vm 생성
 
-이제, 쿠버네티스 노드들을 위한 vm들을 생성해준다.
+이제, 쿠버네티스 노드들을 위한 vm들을 생성해준다. \
 반복문을 이용해서 값만 변경하여 여러 개 생성한다.
 
-template vm의 id와 라우터의 내부망 ip를 remote_state로 참조해온다.
-그뒤, 3개의 노드를 생성한다.
+template vm의 id와 라우터의 내부망 ip를 remote_state로 참조해온다. \
+그뒤, 3개의 노드를 생성한다. \
 **기본 게이트웨이로 앞에서 만든 라우터로 트래픽이 향하도록** 만든 것을 알 수 있다.
 
 ```hcl
@@ -739,7 +737,7 @@ module "k8s-node" {
 
 ### Cloud-init
 
-여기서는 별도의 큰 작업 없이, 일부 필수프로그램만 받아주며 ssh키만 추가한다.
+여기서는 별도의 큰 작업 없이, 일부 필수프로그램만 받아주며 ssh키만 추가한다. \
 또한, NAT설정을 하도록 커널 모듈 로딩과 방화벽 설정을 해주었다.
 
 ```yaml

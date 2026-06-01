@@ -24,7 +24,7 @@ Pod가 하나의 논리적 호스트이기 때문이다.
 2. **Pod-to-Pod** 통신: CNI(Container Network Interface)플러그인을 통해 구현된다.  
 모든 Pod들은 서로 Flat 네트워크에 존재하며, 이 통신은 각 Pod에 부여된 클러스터 내부 IP를 통해 이루어진다.
 3. **Pod-to-Service** 통신: 특정 Pod대신, Service라는 추상화를 통해 접근한다.  
-4. **External-to-Service** 통신: 외부 네트워크가 클러스터 내부의 애플리케이션과 통신하려면, `Service`는 **NodePort** 나 **LoadBalancer**, 혹은 **Ingress**를 통해 외부 IP에 노출되어야 한다.  
+4. **External-to-Service** 통신: 외부 네트워크가 클러스터 내부의 애플리케이션과 통신하려면, `Service`는 **NodePort** 나 **LoadBalancer**, 혹은 **Ingress** / **Gateway API** 를 통해 외부 IP에 노출되어야 한다.  
 
 서비스의 포트 충돌은 매우 골치아픈 존재이고, 동적으로 이들을 바꾸는 것은 큰 복잡도를 불러일으킨다.  
 대신, 쿠버네티스는 `Service`를 통해서 이를 해결한다.
@@ -83,13 +83,13 @@ Pod가 하나의 논리적 호스트이기 때문이다.
 - 단일 부분(label)은 **63자 이하**
 
 ---
-## 🍀 4가지 서비스의 종류
+## 🍀 서비스의 종류
 
-쿠버네티스는 4가지의 `Service`를 제공한다.
+쿠버네티스는 다양한 `Service`를 제공한다.
 - ClusterIP
 - NodePort
 - LoadBalancer
-- Ingress
+- Ingress(이제는 Gateway API가 권장)
 
 ### ClusterIP
 ![ClusterIP](k8s-nw-clusterip.png)
