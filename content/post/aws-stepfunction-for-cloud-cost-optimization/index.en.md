@@ -9,6 +9,10 @@ hidden: false
 comments: true
 draft: false
 
+categories:
+    - AWS
+    - Kubernetes
+
 tags:
     - AWS
     - Terraform
@@ -87,6 +91,10 @@ Step Function:
 5. At this point, `hibernate.auto.tfvars.json` is injected to override `natgw_azs = []` and `enable_full_vpce = false`, removing the NAT Gateway, its associated EIP, and unnecessary VPC endpoint layers.
 6. The end Lambda sends a Slack notification.
 
+After the workflow finishes, the result of each job and the overall status can be checked from Slack.
+
+![Hibernate Slack notification](hibernate-slack.png)
+
 ### Reboot
 
 Step Function:
@@ -102,6 +110,10 @@ Step Function:
       Starts the dev RDS instance again.
       It polls RDS status until the instance becomes available.
 5. The end Lambda sends a Slack notification.
+
+The reboot workflow also reports the recovery result through a Slack message.
+
+![Reboot Slack notification](reboot-slack.png)
 
 Inside the cluster:
 1. kube-green restores the Pods.

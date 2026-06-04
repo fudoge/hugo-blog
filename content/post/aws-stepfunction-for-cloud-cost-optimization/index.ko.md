@@ -9,6 +9,10 @@ hidden: false
 comments: true
 draft: false
 
+categories:
+    - AWS
+    - Kubernetes
+
 tags:
     - AWS
     - Terraform
@@ -88,6 +92,10 @@ Step Function:
 5. 이때 hibernate.auto.tfvars.json을 주입해 natgw_azs = [], enable_full_vpce = false로 덮어써서 NAT Gateway, 연결된 EIP, 불필요한 VPC endpoint 계층을 제거한다.
 6. 종료 Lambda를 호출해 Slack 알림을 보낸다.
 
+실행이 끝나면 아래처럼 각 작업 결과와 전체 상태를 Slack으로 확인할 수 있다.
+
+![Hibernate Slack notification](hibernate-slack.png)
+
 ### Reboot
 
 Step Function:
@@ -102,6 +110,10 @@ Step Function:
     - RDS start:
       dev RDS를 다시 기동합니다. RDS 상태를 polling하면서 available이 될 때까지 대기
 5. 종료 Lambda를 호출해 Slack 알림을 보냄.
+
+reboot 역시 동일하게 복구 작업 결과를 Slack 메시지로 확인할 수 있다.
+
+![Reboot Slack notification](reboot-slack.png)
 
 클러스터 내부:
 1. kube-green이 Pod들을 다시 복구.
