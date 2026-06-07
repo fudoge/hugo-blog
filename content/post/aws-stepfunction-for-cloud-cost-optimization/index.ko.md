@@ -73,10 +73,10 @@ tags:
 
 ![Hibernate sfn](hibernate.png)
 
-클러스터 내부:
+**클러스터 내부:**
 1. Kube-green이 deployment들의 replica를 0으로 만든다.
 
-Step Function:
+**Step Function:**
 1. EventBridge Scheduler가 예약된 시각에 hibernate Step Function 실행을 시작.
 2. 시작 Lambda를 호출해 Slack 알림을 보냄
 3. 아래 작업을 병렬로 실행
@@ -98,7 +98,7 @@ Step Function:
 
 ### Reboot
 
-Step Function:
+**Step Function:**
 
 1. EventBridge Scheduler가 예약된 시각에 reboot Step Function 실행을 시작.
 2. 별도 임시 변수 주입 없이 live/cluster/vpc를 다시 apply.
@@ -115,7 +115,7 @@ reboot 역시 동일하게 복구 작업 결과를 Slack 메시지로 확인할 
 
 ![Reboot Slack notification](reboot-slack.png)
 
-클러스터 내부:
+**클러스터 내부:**
 1. kube-green이 Pod들을 다시 복구.
 
 ![Reboot sfn](reboot.png)
