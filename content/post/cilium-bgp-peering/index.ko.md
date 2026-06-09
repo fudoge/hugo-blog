@@ -748,6 +748,7 @@ NAME                             TYPE           CLUSTER-IP       EXTERNAL-IP   P
 ...
 http-test                        LoadBalancer   10.105.166.135   172.20.0.1    80:30525/TCP     5d8h
 ...
+```
 
 이제, `curl http://172.20.0.1:80`로 테스트해보면 된다.
 
