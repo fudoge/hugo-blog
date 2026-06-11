@@ -16,7 +16,7 @@ categories:
     - TritonServer
 ---
 
-Triton Inference Server에서는 지연시간을 줄이고, 처리량을 늘리는 여러 기능이 있다.  
+Triton Inference Server에서는 지연시간과 처리량을 튜닝하는 기능을 제공한다. \
 우선은, 단일 모델에서의 지연과 처리량 트레이드오프를 이해하는데 집중한다.  
 - [Model Analyzer](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/model_analyzer.html)는 단일 GPU에서 여러 모델들을 최적으로 올릴지에 대한 고민으로 GPU 메모리 사용량의 이해를 돕는다.  
 
@@ -114,7 +114,7 @@ Concurrency: 8, throughput: 267.8 infer/sec, latency 35590 usec
 
 ### Model Instances
 Triton은 각 모델이 추론 인스턴스를 몇 개를 띄울지를 정하게 할 수 있다.   
-기본적으로는 1개를 가짖지만, `instance group`을 이용해서 여러 개의 인스턴스를 만들 수 있다.   
+기본적으로는 1개를 가지지만, `instance group`을 이용해서 여러 개의 인스턴스를 만들 수 있다.   
 일반적으로 두 개의 인스턴스를 쓸 때 처리량이 늘어날 수 있다.   
 CPU 와 GPU의 전환작업 및 겹치는 연산, 또는 작은 모델이 GPU 자원을 전부 쓰지 못하는 경우에 효과적이다.
 
