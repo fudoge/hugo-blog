@@ -1,5 +1,5 @@
 ---
-title: "CKA(Certified Kubernetes Administrator) 후기 (2026)"
+title: "CKA(Certified Kubernetes Administrator) 후기 (2026.04)"
 slug: cka-review-2026
 description: CKA 응시 및 합격후기(2026년 4월)와 준비 과정, 최신 정보, 팁.
 date: 2026-04-19T09:30:00+09:00
@@ -32,7 +32,7 @@ categories:
     - Services & Networking: 20%
 - **시험 시간:** 120분
 - **Kubernetes 버전:** v1.35 (2026. 04. 18기준, 보통 마이너 버전이 출시되고 1~2개월 이후에 시험버전이 업데이트)
-- **비용:** $445
+- **비용:** $445(2026.04 기준)
     - 구매 시, 1년 이내로 시험을 신청할 수 있음
     - 1번의 재기회 제공
     - 정가에 구매하지 말고, 쿠폰을 통한 할인을 노리는 것 권장

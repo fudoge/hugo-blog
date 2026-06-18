@@ -1,5 +1,5 @@
 ---
-title: "CKA Review: Preparation Strategy, Exam Experience, and Takeaways (2026 Ver)"
+title: "CKA Review: Preparation Strategy, Exam Experience, and Takeaways (2026.04 Ver)"
 slug: cka-review-2026
 description: A concise review of my CKA journey covering preparation time, recommended materials, the remote exam environment, useful tips, and lessons learned after certification.
 date: 2026-04-19T09:30:00+09:00
@@ -32,7 +32,7 @@ categories:
     - Services & Networking: 20%
 - **Exam duration:** 120 minutes
 - **Kubernetes version:** v1.35 (as of April 18, 2026; The exam version is usually updated 1-2 months after a new minor version is released)
-- **Cost:** $445
+- **Cost:** $445(2026.04)
     - After purchase, you can schedule the exam within one year
     - One retake is included
     - It is recommended not to but at full price and instread look for discounts through coupons
