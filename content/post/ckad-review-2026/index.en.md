@@ -32,7 +32,7 @@ I bought the exam voucher late last year through an early-bird discount on Progr
     - Services and Networking: 20%
 - **Duration:** 120 minutes
 - **Kubernetes version:** v1.35 (as of 2026.06.17; the exam version is usually updated 1 to 2 months after a new minor release)
-- **Cost:** $445 (as of 2026.04)
+- **Cost:** $445 (as of 2026.06)
     - After purchase, you can schedule the exam within 1 year.
     - 1 free retake is included.
     - I recommend looking for discount coupons instead of paying the full price.
