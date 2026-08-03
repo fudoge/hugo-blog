@@ -53,7 +53,7 @@ Peer의 구성 설정은 `peerConfigRef`필드로 참조할 수 있다.
 이게 기본인데, 그 이유는 같은 노드에서 BGP라우터가 동작할 수 있음을 고려했기 때문이다.  
 들어오는 커넥션을 받으려면, `localPort`필드로 리스닝 포트를 정할 수 있다.
 
-> **NOTE**  
+> **NOTE**  \
 > 기본 BGP Port(179)를 쓸 때에는, `CAP_NET_BIND_SERVICE`가 필요하다.  
 > 만약 기본 포트를 쓰고싶다면, `securityContext.capabilities.ciliumAgent`에서 `CAP_NET_BIND_SERVICE`를 helm value로 넣어줘야 한다.
 
@@ -290,7 +290,7 @@ spec:
 각 Address family에서는, `advertisements` label selector를 통해 라우트 광고를 제어할 수 있다.  
 `CiliumBGPAdvertisement`를 골라야 한다.
 
-> **NOTE**
+> **NOTE** \
 > 매칭이 없으면, 아무 prefix도 광고될 수 없다.
 
 
@@ -441,7 +441,7 @@ selector:
 Service는 여러 virtual IP를 가질 수 있다.  
 Service의 virtual IP를 BGP Peer로 광고할 수 있다.
 
-> **NOTE**
+> **NOTE** \
 > Cilium의 BGP Control Plane은 VIP를 /32또는 /128 prefix로 광고한다.
 
 service의 virtual IP를 광고하기 위해, `advertisementType`의 필드를 `Service`로 하고,  
@@ -471,10 +471,10 @@ spec:
 
 업스트림 라우터가 **ECMP(Equal Cost Multi Path)**를 지원한다면, 같은 VIP에 대해서 실제로 로드밸런싱이 일어날 것이다.
 
-> **NOTE**
-> 많은 라우터들이 라우팅 테이블에 저장하는 ECMP 경로에 대해 한계를 가지는데,
-> 많은 노드들로부터 Service VIP가 광고된다면, 한계를 넘을 수 있다.
-> 이 기능을 쓰려면, 네트워크 관리자로부터 한계를 알아내는 것이 좋을 것이다.
+> **NOTE** \
+> 많은 라우터들이 라우팅 테이블에 저장하는 ECMP 경로에 대해 한계를 가지는데, \
+> 많은 노드들로부터 Service VIP가 광고된다면, 한계를 넘을 수 있다. \
+> 이 기능을 쓰려면, 네트워크 관리자로부터 한계를 알아내는 것이 좋을 것이다. \
 
 각 주소 타입별로 특징이 있다:
 - ClusterIP
@@ -496,8 +496,8 @@ service가 LoadBalancer 타입일때, `loadBalancerClass=io.cilium/bgp-control-p
 
 대신, 다른 class를 지정하면, Cilium은 광고할 수 없다.
 
-> **NOTE**
-> `externalTrafficPolicy`가 `Cluster`인경우, 조건 없이 광고하지만, 
+> **NOTE** \
+> `externalTrafficPolicy`가 `Cluster`인경우, 조건 없이 광고하지만,  
 > `Local`인 경우, 해당 endpoint가 없으면 광고하지 않는다.
 
 하나의 Service가 여러 advertisement selector에 동시에 걸릴 수 있는데, 이 경우 community는 합쳐지며(union), local-pref는 가장 큰 값 하나(max)를 쓴다.

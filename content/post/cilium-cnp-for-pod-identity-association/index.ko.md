@@ -48,11 +48,11 @@ Hubble UI를 통해서도 트래픽이 시각화되지 않았다.
 ## 🔐 EKS Pod Identity란
 
 EKS Pod Identity는 EKS에서 Pod에게 IAM Role을 할당하는 새로운 방법이다. \
-Pod Identity Agent는 daemonset으로 각 노드에 하나씩 있으며, Pod는 노드의 링크 로컬 주소 `169.254.170.23`에 자격 증명을 요청한다. \
+Pod Identity Agent는 daemonset으로 각 노드에 하나씩 있으며, Pod는 노드의 링크 로컬 주소 `169.254.170.23`에 자격 증명을 요청한다. 
 
 동작 과정은 다음과 같다:
 1. EKS에서 EKS Pod identity association으로 연결된 ServiceAccount를 사용하는 Pod가 새로 생성됨
-2. EKS가 Pod의 manifest에 자동으로 환경변수를 및 token volume 주입
+2. EKS가 Pod의 manifest에 자동으로 환경변수 및 token volume를 주입
 환경변수:
 ```yaml
 env:
