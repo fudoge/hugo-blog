@@ -313,7 +313,7 @@ Docker가 제공하는 기본 브릿지 네트워크인 `docker0`는 다음과 �
 컨테이너가 같은 브릿지 네트워크간의 통신을 할 뿐만 아니라, 인터넷에 연결될 수 있도록 NAT를 지원하며,   
 `-p`옵션등을 통해서 host에 들어오는 특정 포트가 컨테이너에 연결되도록 포워딩을 제공할 수 있다.  
 
-![Docker Bridge Network](docker-network.png)  
+![Docker Bridge Network](docker-network.webp)  
 
 ---
 ## 🏗️ Docker 브릿지 네트워크 따라하기

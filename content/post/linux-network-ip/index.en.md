@@ -315,7 +315,7 @@ Docker's default bridge network, `docker0`, can be understood as having the foll
 It not only lets containers communicate within the same bridge network, but also supports NAT so containers can connect to the Internet.  
 It can also provide forwarding so a specific port coming into the host is connected to a container through options such as `-p`.  
 
-![Docker Bridge Network](docker-network.png)  
+![Docker Bridge Network](docker-network.webp)  
 
 ---
 ## 🏗️ Recreating a Docker Bridge Network
