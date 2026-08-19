@@ -2,7 +2,7 @@
 title: "Linux Network - ip Command and Docker Bridge Network"
 description: Learn the basics of the Linux ip command, network namespaces, and Docker bridge networking
 date: 2026-08-15T15:34:07+09:00
-image: docker-network.png
+image: docker-network.webp
 math: true
 license: 
 hidden: false

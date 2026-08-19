@@ -2,7 +2,7 @@
 title: "Linux Network - ip 명령어와 Docker 브릿지 네트워크"
 description: Linux ip 명령어와 network namespace, Docker 브릿지 네트워크의 기본 구조를 알아보자
 date: 2026-08-15T15:34:03+09:00
-image: docker-network.png
+image: docker-network.webp
 math: true
 license: 
 hidden: false
