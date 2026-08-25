@@ -4,7 +4,7 @@ description: "Netfilter hook 흐름과 nftables chain, conntrack, Docker bridge 
 date: 2026-08-26T01:49:01+09:00
 image: netfilter-hook.webp
 math: false
-license: 
+license:
 hidden: false
 comments: true
 draft: false
@@ -28,83 +28,83 @@ Linux에서 방화벽, NAT, 포트 포워딩을 이해하려면 결국 **Netfilt
 아래 그림은 Linux networking의 packet flow를 보여준다.
 ![](netfilter-hook.webp)
 - Driver RX path / Driver TX path:
-	- RX path:
-		- RX = Receive를 의미.
-		- NIC로부터 frame을 받은 뒤, NIC driver가 Linux networking stack으로 올리기까지의 과정
-	- TX path:
-		- TX = Transmit을 의미.
-		- Linux networking stack에서 NIC driver로 보내는 과정
+    - RX path:
+        - RX = Receive를 의미.
+        - NIC로부터 frame을 받은 뒤, NIC driver가 Linux networking stack으로 올리기까지의 과정
+    - TX path:
+        - TX = Transmit을 의미.
+        - Linux networking stack에서 NIC driver로 보내는 과정
 - Ingress
-	- 들어오는 패킷이 networking stack까지 들어가기 직전의 지점
-	- Ingress hook은 prerouting보다 더 빠른 단계에서 필터링 가능
-		- fragmented datagram들이 재조립되기 이전에 판단됨
-		- 즉, UDP의 Destination port를 매칭하는 등은 첫 fragment나 unfragmented packet에서만 가능하므로, 포트 매칭을 하기에는 부적합함
+    - 들어오는 패킷이 networking stack까지 들어가기 직전의 지점
+    - Ingress hook은 prerouting보다 더 빠른 단계에서 필터링 가능
+        - fragmented datagram들이 재조립되기 이전에 판단됨
+        - 즉, UDP의 Destination port를 매칭하는 등은 첫 fragment나 unfragmented packet에서만 가능하므로, 포트 매칭을 하기에는 부적합함
 - Egress
-	- 나가는 패킷이 networking stack의 처리를 마치고, network interface로 내보내기 직전
-	- Ingress처럼 별도의 hook이 실행될 수 있음
+    - 나가는 패킷이 networking stack의 처리를 마치고, network interface로 내보내기 직전
+    - Ingress처럼 별도의 hook이 실행될 수 있음
 
 그림의 여러 경우의 수를 살펴보자.
 - ARP 질의를 받은 경우:
-	1. RX path
-	2. Ingress
-	3. Bridge Port? -> No, Protocol Type? -> ARP
-	4. ARP Input hook을 거침
-	5. ARP Handler 처리 (응답 생성)
-	6. Output hook을 거침
-	7. Egress
-	8. TX path
+    1. RX path
+    2. Ingress
+    3. Bridge Port? -> No, Protocol Type? -> ARP
+    4. ARP Input hook을 거침
+    5. ARP Handler 처리 (응답 생성)
+    6. Output hook을 거침
+    7. Egress
+    8. TX path
 - 웹 서버가 HTTP 요청을 받은 경우:
-	1. RX path
-	2. Ingress
-	3. Bridge Port? -> No, Protocol Type? -> IP
-	4. IP Prerouting Hook
-	5. Routing Decision
-	6. IP Input Hook
-	7. TCP socket
-	8. Local Process (Web server, 아래부터는 새로운 outbound packet임)
-	9. TCP socket
-	10. Routing Decision
-	11. IP Output Hook
-	12. IP Postrouting Hook
-	13. Egress
-	14. TX path
+    1. RX path
+    2. Ingress
+    3. Bridge Port? -> No, Protocol Type? -> IP
+    4. IP Prerouting Hook
+    5. Routing Decision
+    6. IP Input Hook
+    7. TCP socket
+    8. Local Process (Web server, 아래부터는 새로운 outbound packet임)
+    9. TCP socket
+    10. Routing Decision
+    11. IP Output Hook
+    12. IP Postrouting Hook
+    13. Egress
+    14. TX path
 - 같은 host의 Docker 기본 브릿지 네트워크에 소속한 `172.17.0.2` 컨테이너 A로부터 `172.17.0.3` 컨테이너 B로 향하는 트래픽이 온 경우
-	- A는 B의 MAC 주소를 ARP를 통해 알아낸 뒤 veth로 송신
-	1. RX path
-	2. Ingress
-	3. Bridge Port? -> Yes
-	4. Prerouting Bridge
-	5. Bridge Decision(dst MAC == b의 MAC)
-	6. Forward Bridge
-	7. Postrouting Bridge
-	8. Egress
-	9. TX path
+    - A는 B의 MAC 주소를 ARP를 통해 알아낸 뒤 veth로 송신
+    1. RX path
+    2. Ingress
+    3. Bridge Port? -> Yes
+    4. Prerouting Bridge
+    5. Bridge Decision(dst MAC == b의 MAC)
+    6. Forward Bridge
+    7. Postrouting Bridge
+    8. Egress
+    9. TX path
 - Docker의 기본 브릿지 네트워크에 소속한 컨테이너 A가 인터넷에 접속하길 원함(ex. 8.8.8.8)
-	- A가 보내는 frame의 dst MAC은 docker0의 MAC
-	1. RX path
-	2. Ingress
-	3. Bridge Port? -> Yes
-	4. Bridge Prerouting
-	5. Bridge Decision 
-		- dst MAC == docker0 (local)
-	6. Bridge INPUT
-	7. IP Prerouting
-	8. IP Routing Decision
-		- dst = 8.8.8.8
-		- default route -> eth0
-	9. IP Forward
-	10. IP Postrouting
-		- MASQUERADE(NAT)
-		- src 172.17.0.2 -> 192.168.10.10
-	11. Egress(eth0)
-	12. TX path
+    - A가 보내는 frame의 dst MAC은 docker0의 MAC
+    1. RX path
+    2. Ingress
+    3. Bridge Port? -> Yes
+    4. Bridge Prerouting
+    5. Bridge Decision
+        - dst MAC == docker0 (local)
+    6. Bridge INPUT
+    7. IP Prerouting
+    8. IP Routing Decision
+        - dst = 8.8.8.8
+        - default route -> eth0
+    9. IP Forward
+    10. IP Postrouting
+        - MASQUERADE(NAT)
+        - src 172.17.0.2 -> 192.168.10.10
+    11. Egress(eth0)
+    12. TX path
 
 간단히 정리하면, 기본적인 플로우는 아래와 같다.
-- **외부 -> Local**
+- **외부 -> Local**\
   PREROUTING -> Routing -> INPUT
-- **외부 -> 외부 (Router)**
+- **외부 -> 외부 (Router)**\
   PREROUTING -> Routing -> FORWARD -> POSTROUTING
-- **Local -> 외부**
+- **Local -> 외부**\
   Routing -> OUTPUT -> POSTROUTING
 
 트래픽을 포워딩시키고 싶으면, 아래 명령으로 허용한다.
@@ -137,11 +137,11 @@ nft 'add chain ip filter input { type filter hook input priority 0; }'
 ```
 
 - 이 `add chain` 명령은 input chain을 등록하고, 이 체인을 input hook에 연결한다.
-	- 이 체인은 로컬 시스템 프로세스를 목적지로 하는 패킷, 즉 이 컴퓨터로 들어오는 패킷을 확인한다.
+    - 이 체인은 로컬 시스템 프로세스를 목적지로 하는 패킷, 즉 이 컴퓨터로 들어오는 패킷을 확인한다.
 - **priority는 중요하다. chain의 실행 순서를 정하기 때문이다.**
-	- Input hook에 여러 체인이 있다면, 작은 순서대로 동작한다.
-	- 두 개의 base chain이 같은 priority를 가지는 것은 가능하지만, 매번 평가가 달라질 수 있어 불확실하다.
-	- 여기서 `filter`는 테이블의 이름으로 쓰였을 뿐, chain의 type은 아니다.
+    - Input hook에 여러 체인이 있다면, 작은 순서대로 동작한다.
+    - 두 개의 base chain이 같은 priority를 가지는 것은 가능하지만, 매번 평가가 달라질 수 있어 불확실하다.
+    - 여기서 `filter`는 테이블의 이름으로 쓰였을 뿐, chain의 type은 아니다.
 
 데스크톱과 같은 포워딩하지 않는 컴퓨터에서도 output chain을 등록 가능하다.
 이 output chain은 로컬 컴퓨터의 프로세스에서 생성되어 외부로 나가는 패킷을 처리한다.
@@ -150,7 +150,7 @@ nft 'add chain ip filter output { type filter hook output priority 0; }'
 ```
 
 이제 incoming(로컬 프로세스로 오는) 패킷과 outgoing(로컬 프로세스에 의해 생긴) 트래픽을 필터링할 수 있다.
-> **NOTE**
+> **NOTE**\
 > 만약 중괄호(`{}`)로 감싸지지 않은 체인을 포함하면, 아무 패킷을 보지 않는 regular chain을 만드는 것이다. (`iptables -N chain-name`과 같음)
 
 nftables 0.5부터, default policy를 추가할 수 있다:
@@ -166,20 +166,20 @@ nft 'add chain netdev filter eth0_filter { type filter hook ingress device eth0 
 
 #### Base Chain의 종류
 Base chain에는 세 가지가 있다:
-- **filter**: 
-	- 패킷을 필터링할 때 사용. 허용 및 차단 등이 가능. 
-	- `arp`, `bridge`, `ip`, `ip6`, `inet` table family에서 지원된다.
-- **route**: 
-	- 관련 IP 헤더 필드나 packet mark가 변경되었을 때, 라우팅 경로를 다시 계산(리라우팅)할 때 사용한다.
-	- `iptables`의 `mangle`과 비슷하다.
-	- 대신, route 체인 타입은 output hook에서만 사용한다.
-	- 다른 hook에서는 route 말고 filter를 사용해야 한다.
-	- `ip`, `ip6`, `inet` 테이블 패밀리에서 지원된다.
-- **nat**: 
-	- NAT(Network Address Translation)를 수행할 때 사용.
-	- 하나의 flow에 대해, 첫 번째 패킷만 `nat`체인을 통과한다.
-	- 이후 패킷들은 거치지 않는다.
-	- `ip`, `ip6`, `inet` table family에서 지원된다.
+- **filter**:
+    - 패킷을 필터링할 때 사용. 허용 및 차단 등이 가능.
+    - `arp`, `bridge`, `ip`, `ip6`, `inet` table family에서 지원된다.
+- **route**:
+    - 관련 IP 헤더 필드나 packet mark가 변경되었을 때, 라우팅 경로를 다시 계산(리라우팅)할 때 사용한다.
+    - `iptables`의 `mangle`과 비슷하다.
+    - 대신, route 체인 타입은 output hook에서만 사용한다.
+    - 다른 hook에서는 route 말고 filter를 사용해야 한다.
+    - `ip`, `ip6`, `inet` 테이블 패밀리에서 지원된다.
+- **nat**:
+    - NAT(Network Address Translation)를 수행할 때 사용.
+    - 하나의 flow에 대해, 첫 번째 패킷만 `nat`체인을 통과한다.
+    - 이후 패킷들은 거치지 않는다.
+    - `ip`, `ip6`, `inet` table family에서 지원된다.
 
 #### Base chain hook들
 
@@ -196,9 +196,9 @@ Base chain에서 다음의 hook들을 사용할 수 있다.
 각 nftables base chain에는 priority 값이 저장되는데, 같은 hook에 연결된 다른 base chain, flowtable, Netfilter 내부 처리 작업들과 비교해서 어떤 순서로 실행될지를 결정한다.
 
 예를 들어, prerouting hook에 -300짜리 priority가 붙으면 connection tracking(CONNTRACK)보다 더 먼저 실행된다.
-> **NOTE**
-> 패킷이 accept되고 다른 체인이 있고, 그 체인이 같은 hook type에 늦은 priority를 가진다면, 다음 체인으로 계속 진행된다.
-> 즉, accept는 최종 허용을 의미하지 않는다.
+> **NOTE**\
+> 패킷이 accept되고 다른 체인이 있고, 그 체인이 같은 hook type에 늦은 priority를 가진다면, 다음 체인으로 계속 진행된다.\
+> 즉, accept는 최종 허용을 의미하지 않는다.\
 > 그러나, drop은 즉시 최종 결정된다.
 
 다음의 룰셋을 보자:
@@ -229,15 +229,15 @@ table ip filter {
 실행 순서는 priority가 작은 순이므로, services -> input의 순서를 가진다.
 
 - HTTP 패킷이 들어오는 경우
-	- services 체인에서 drop (`tcp dport http drop`에 의해)
+    - services 체인에서 drop (`tcp dport http drop`에 의해)
 - SSH 패킷이 들어오는 경우
-	- services 체인에서 accept(`tcp dport ssh accept`에 의해)
-	- 그러나, input 체인에서 `drop`
+    - services 체인에서 accept(`tcp dport ssh accept`에 의해)
+    - 그러나, input 체인에서 `drop`
 - 그 외 패킷
-	- services에서 허용(기본 accept)
-	- 그러나 input체인에서 `drop`
+    - services에서 허용(기본 accept)
+    - 그러나 input체인에서 `drop`
 - 만약 chain input의 priority를 -1로 두면?
-	- services에 도달하기 이전에 input에서 drop
+    - services에 도달하기 이전에 input에서 drop
 #### Base chain 정책
 
 더 이상 평가할 규칙이 없는 경우, 두 가지 정책이 가능하다:
@@ -358,35 +358,35 @@ nft monitor trace
 
 # inet family에서 'firewall'이라는 이름의 table 생성
 table inet firewall {
-	# 'forward' chain: 
-	# 여기서의 forward는 chain의 이름일 뿐, 의미를 가지지 않는다.
+    # 'forward' chain:
+    # 여기서의 forward는 chain의 이름일 뿐, 의미를 가지지 않는다.
     chain forward {
-		# 필터링용 체인임을 의미
-		# forward지점에 연결
-		# 일반적인 필터링의 위치에서 실행
-		# 기본적으로 deny
+        # 필터링용 체인임을 의미
+        # forward지점에 연결
+        # 일반적인 필터링의 위치에서 실행
+        # 기본적으로 deny
         type filter hook forward priority filter; policy drop;
 
-		# eth1 -> eth0트래픽에 대해 승인
+        # eth1 -> eth0트래픽에 대해 승인
         iifname "eth1" oifname "eth0" accept
-		# eth0 -> eth1에 대해서, ct(conntrack)에서의 추적 상태가 established, related인 경우 허용
-		# 주목할 점은, ct가 보는 established와 TCP state machine의 ESTABLISHED는 다르다는 것이다.
-		# ct의 established 상태는 그저 현재 연결에 추적에 대한 응답이라고 보면 된다.
-		# 즉, UDP 패킷의 응답도 ct에서는 established로 추적한다.
-		# related는 기존 트래픽과 연결된 새로운 커넥션을 말하는데, FTP data 연결이나, ICMP error등이 있다.
+        # eth0 -> eth1에 대해서, ct(conntrack)에서의 추적 상태가 established, related인 경우 허용
+        # 주목할 점은, ct가 보는 established와 TCP state machine의 ESTABLISHED는 다르다는 것이다.
+        # ct의 established 상태는 그저 현재 연결에 추적에 대한 응답이라고 보면 된다.
+        # 즉, UDP 패킷의 응답도 ct에서는 established로 추적한다.
+        # related는 기존 트래픽과 연결된 새로운 커넥션을 말하는데, FTP data 연결이나, ICMP error등이 있다.
         iifname "eth0" oifname "eth1" ct state related,established accept
     }
 
-	# 'postrouting' chain:
-	# 이 체인명 역시 이름이 postrouting이라는 것 뿐, 의미를 가지는 게 아님.
+    # 'postrouting' chain:
+    # 이 체인명 역시 이름이 postrouting이라는 것 뿐, 의미를 가지는 게 아님.
     chain postrouting {
-		# NAT 처리 체인
-		# 라우팅 연결이 끝난 뒤, 패킷이 실제로 나가기 전 단계에 연결.
-		# source NAT 처리가 되는 표준 우선순위
-		# 기본 승인(NAT체인은 보통 기본 승인)
+        # NAT 처리 체인
+        # 라우팅 연결이 끝난 뒤, 패킷이 실제로 나가기 전 단계에 연결.
+        # source NAT 처리가 되는 표준 우선순위
+        # 기본 승인(NAT체인은 보통 기본 승인)
         type nat hook postrouting priority srcnat; policy accept;
 
-		# 아웃바운드 인터페이스가 `eth0`인 경우, `eth0`의 주소로 masquerade
+        # 아웃바운드 인터페이스가 `eth0`인 경우, `eth0`의 주소로 masquerade
         oifname "eth0" masquerade
     }
 }
@@ -447,52 +447,52 @@ Docker에서는 어떻게 NAT 및 Port forwarding을 처리하는지 알아보�
 # Warning: table ip nat is managed by iptables-nft, do not touch!
 table ip nat {
         chain DOCKER {
-				# TCP destination port가 8080이고 docker0에서 온 패킷이 아니라면,
-				# 172.17.0.2:80포트로 목적지 주소 변환
+                # TCP destination port가 8080이고 docker0에서 온 패킷이 아니라면,
+                # 172.17.0.2:80포트로 목적지 주소 변환
                 iifname != "docker0" tcp dport 8080 counter packets 0 bytes 0 dnat to 172.17.0.2:80
         }
 
-		# DNAT는 보통 prerouting 단계에서 이루어짐
-		# 그러나, 이 체인의 이름은 의미를 가지지 않음. 실제 hook이 붙는 건 base chain에서.
+        # DNAT는 보통 prerouting 단계에서 이루어짐
+        # 그러나, 이 체인의 이름은 의미를 가지지 않음. 실제 hook이 붙는 건 base chain에서.
         chain PREROUTING {
-				# base chain: default accept
+                # base chain: default accept
                 type nat hook prerouting priority dstnat; policy accept;
-				# FIB(forwarding information base)를 조회하여 
-				# Linux routing 관점에서 Destination IP가 호스트 자신의 주소라면
-				# DOCKER chain으로 jump
+                # FIB(forwarding information base)를 조회하여
+                # Linux routing 관점에서 Destination IP가 호스트 자신의 주소라면
+                # DOCKER chain으로 jump
                 fib daddr type local counter packets 0 bytes 0 jump DOCKER
         }
 
         chain OUTPUT {
-				# output base chain: default accept
+                # output base chain: default accept
                 type nat hook output priority dstnat; policy accept;
-				# destination IP가 loopback 대역이 아니고
-				# FIB조회 결과 목적지가 이 호스트의 local 주소라면
-				# DOCKER chain으로 jump
-				# loopback이 대상인 경우는 docker-proxy가 중개
+                # destination IP가 loopback 대역이 아니고
+                # FIB조회 결과 목적지가 이 호스트의 local 주소라면
+                # DOCKER chain으로 jump
+                # loopback이 대상인 경우는 docker-proxy가 중개
                 ip daddr != 127.0.0.0/8 fib daddr type local counter packets 0 bytes 0 jump DOCKER
         }
 
         chain POSTROUTING {
-				# Postrouting: 나가는 패킷에 대해 (SNAT): default accept
+                # Postrouting: 나가는 패킷에 대해 (SNAT): default accept
                 type nat hook postrouting priority srcnat; policy accept;
-				# source address가 172.17.0.0/16, 나가는 인터페이스가 docker0가 아니라면, 
-				# source IP를 해당 출력 인터페이스의 IP로 SNAT(MASQUERADE)
+                # source address가 172.17.0.0/16, 나가는 인터페이스가 docker0가 아니라면,
+                # source IP를 해당 출력 인터페이스의 IP로 SNAT(MASQUERADE)
                 ip saddr 172.17.0.0/16 oifname != "docker0" counter packets 0 bytes 0 masquerade
         }
 }
 # Warning: table ip filter is managed by iptables-nft, do not touch!
 table ip filter {
         chain DOCKER {
-				# destination ip가 172.17.0.2에 docker0로부터 오는 패킷이 아니며
-				# docker0으로 나가는 패킷이고, destination port가 80이면 허용
+                # destination ip가 172.17.0.2에 docker0로부터 오는 패킷이 아니며
+                # docker0으로 나가는 패킷이고, destination port가 80이면 허용
                 ip daddr 172.17.0.2 iifname != "docker0" oifname "docker0" tcp dport 80 counter packets 0 bytes 0 accept
-				# not docker0 -> docker0트래픽에서 앞의 허용 규칙에 매칭되지 않으면 drop
+                # not docker0 -> docker0트래픽에서 앞의 허용 규칙에 매칭되지 않으면 drop
                 iifname != "docker0" oifname "docker0" counter packets 0 bytes 0 drop
         }
 
         chain DOCKER-FORWARD {
-				# 각 chain으로 jump하여 실행한 뒤, 돌아와서 다음 과정을 수행함
+                # 각 chain으로 jump하여 실행한 뒤, 돌아와서 다음 과정을 수행함
                 counter packets 0 bytes 0 jump DOCKER-CT
                 counter packets 0 bytes 0 jump DOCKER-INTERNAL
                 counter packets 0 bytes 0 jump DOCKER-BRIDGE
@@ -500,36 +500,36 @@ table ip filter {
         }
 
         chain DOCKER-BRIDGE {
-				# Forwarding결과, 출력 인터페이스가 docker0이면, DOCKER chain으로 jump
+                # Forwarding결과, 출력 인터페이스가 docker0이면, DOCKER chain으로 jump
                 oifname "docker0" counter packets 0 bytes 0 jump DOCKER
         }
 
         chain DOCKER-CT {
-				# CONNTRACK: established또는 related의 경우, 
-				# 즉, 보낸 패킷이 돌아올 때의 응답 또는 FTP data transfer 등의 경우 허용
-				# 앞에서의 NAT예제에서도 사용한 규칙
+                # CONNTRACK: established또는 related의 경우,
+                # 즉, 보낸 패킷이 돌아올 때의 응답 또는 FTP data transfer 등의 경우 허용
+                # 앞에서의 NAT예제에서도 사용한 규칙
                 oifname "docker0" ct state related,established counter packets 0 bytes 0 accept
         }
 
         chain DOCKER-INTERNAL {
-				# docker network create --internal로 만든 네트워크의 외부 격리 구현
+                # docker network create --internal로 만든 네트워크의 외부 격리 구현
         }
 
         chain FORWARD {
-				# 모든 처리 이후 문제 없다면 accept
+                # 모든 처리 이후 문제 없다면 accept
                 type filter hook forward priority filter; policy accept;
                 counter packets 0 bytes 0 jump DOCKER-USER
                 counter packets 0 bytes 0 jump DOCKER-FORWARD
         }
 
         chain DOCKER-USER {
-			# User 전용 체인
+            # User 전용 체인
         }
 }
 # --- ip6 family는 생략
 table ip raw {
-		# Direct remote access를 차단하기 위한 체인
-		# 즉, port-forwarding으로만 트래픽을 노출하게 하려는 의도
+        # Direct remote access를 차단하기 위한 체인
+        # 즉, port-forwarding으로만 트래픽을 노출하게 하려는 의도
         chain PREROUTING {
                 type filter hook prerouting priority raw; policy accept;
                 ip daddr 172.17.0.2 iifname != "docker0" counter packets 0 bytes 0 drop
@@ -545,106 +545,106 @@ iptables backend로 생성된 것과 어느 정도 유사함을 볼 수 있다.
 # /etc/docker/daemon.json에서
 # { "firewall-backend": "nftables" }를 추가
 
-table ip nat {  
-	chain PREROUTING {  
-		type nat hook prerouting priority dstnat; policy accept;  
-	}  
-  
-	chain OUTPUT {  
-		type nat hook output priority dstnat; policy accept;  
-	}  
-  
-	chain POSTROUTING {  
-		type nat hook postrouting priority srcnat; policy accept;  
-	}  
-}  
+table ip nat {
+    chain PREROUTING {
+        type nat hook prerouting priority dstnat; policy accept;
+    }
 
-table ip filter {  
-	chain FORWARD {  
-		type filter hook forward priority filter; policy accept;  
-		counter packets 0 bytes 0 jump DOCKER-USER  
-	}  
-  
-	chain DOCKER-USER {  
-	}  
-}  
+    chain OUTPUT {
+        type nat hook output priority dstnat; policy accept;
+    }
 
-table ip raw {  
-	chain PREROUTING {  
-		type filter hook prerouting priority raw; policy accept;  
-	}  
-}  
+    chain POSTROUTING {
+        type nat hook postrouting priority srcnat; policy accept;
+    }
+}
 
-table ip docker-bridges {  
-	map filter-forward-in-jumps {  
-		type ifname : verdict  
-		elements = { "docker0" : jump filter-forward-in__docker0 }  
-	}  
-  
-	map filter-forward-out-jumps {  
-		type ifname : verdict  
-		elements = { "docker0" : jump filter-forward-out__docker0 }  
-	}  
-  
-	map nat-postrouting-in-jumps {  
-		type ifname : verdict  
-		elements = { "docker0" : jump nat-postrouting-in__docker0 }  
-	}  
-  
-	map nat-postrouting-out-jumps {  
-		type ifname : verdict  
-		elements = { "docker0" : jump nat-postrouting-out__docker0 }  
-	}  
-  
-	chain filter-FORWARD {  
-		type filter hook forward priority filter; policy accept;  
-		oifname vmap @filter-forward-in-jumps  
-		iifname vmap @filter-forward-out-jumps  
-	}  
-  
-	chain nat-OUTPUT {  
-		type nat hook output priority dstnat; policy accept;  
-		ip daddr != 127.0.0.0/8 fib daddr type local counter packets 0 bytes 0 jump nat-prerouting-and-output  
-	}  
-  
-	chain nat-POSTROUTING {  
-		type nat hook postrouting priority srcnat; policy accept;  
-		iifname vmap @nat-postrouting-out-jumps  
-		oifname vmap @nat-postrouting-in-jumps  
-	}  
-  
-	chain nat-PREROUTING {  
-		type nat hook prerouting priority dstnat; policy accept;  
-		fib daddr type local counter packets 0 bytes 0 jump nat-prerouting-and-output  
-	}  
-  
-	chain nat-prerouting-and-output {  
-		iifname != "docker0" tcp dport 8080 counter packets 0 bytes 0 dnat to 172.17.0.2:80 comment "DNAT"  
-	}  
-  
-	chain raw-PREROUTING {  
-		type filter hook prerouting priority raw; policy accept;  
-		ip daddr 172.17.0.2 iifname != "docker0" counter packets 0 bytes 0 drop comment "DROP DIRECT ACCESS"  
-	}  
-  
-	chain filter-forward-in__docker0 {  
-		ct state established,related counter packets 0 bytes 0 accept  
-		iifname "docker0" counter packets 0 bytes 0 accept comment "ICC"  
-		ip daddr 172.17.0.2 tcp dport 80 counter packets 0 bytes 0 accept  
-		counter packets 0 bytes 0 drop comment "UNPUBLISHED PORT DROP"  
-	}  
-  
-	chain filter-forward-out__docker0 {  
-		ct state established,related counter packets 0 bytes 0 accept  
-		counter packets 0 bytes 0 accept comment "OUTGOING"  
-	}  
-  
-	chain nat-postrouting-in__docker0 {  
-	}  
-  
-	chain nat-postrouting-out__docker0 {  
-		oifname != "docker0" ip saddr 172.17.0.0/16 counter packets 0 bytes 0 masquerade comment "MASQUERADE"  
-		}  
+table ip filter {
+    chain FORWARD {
+        type filter hook forward priority filter; policy accept;
+        counter packets 0 bytes 0 jump DOCKER-USER
+    }
+
+    chain DOCKER-USER {
+    }
+}
+
+table ip raw {
+    chain PREROUTING {
+        type filter hook prerouting priority raw; policy accept;
+    }
+}
+
+table ip docker-bridges {
+    map filter-forward-in-jumps {
+        type ifname : verdict
+        elements = { "docker0" : jump filter-forward-in__docker0 }
+    }
+
+    map filter-forward-out-jumps {
+        type ifname : verdict
+        elements = { "docker0" : jump filter-forward-out__docker0 }
+    }
+
+    map nat-postrouting-in-jumps {
+        type ifname : verdict
+        elements = { "docker0" : jump nat-postrouting-in__docker0 }
+    }
+
+    map nat-postrouting-out-jumps {
+        type ifname : verdict
+        elements = { "docker0" : jump nat-postrouting-out__docker0 }
+    }
+
+    chain filter-FORWARD {
+        type filter hook forward priority filter; policy accept;
+        oifname vmap @filter-forward-in-jumps
+        iifname vmap @filter-forward-out-jumps
+    }
+
+    chain nat-OUTPUT {
+        type nat hook output priority dstnat; policy accept;
+        ip daddr != 127.0.0.0/8 fib daddr type local counter packets 0 bytes 0 jump nat-prerouting-and-output
+    }
+
+    chain nat-POSTROUTING {
+        type nat hook postrouting priority srcnat; policy accept;
+        iifname vmap @nat-postrouting-out-jumps
+        oifname vmap @nat-postrouting-in-jumps
+    }
+
+    chain nat-PREROUTING {
+        type nat hook prerouting priority dstnat; policy accept;
+        fib daddr type local counter packets 0 bytes 0 jump nat-prerouting-and-output
+    }
+
+    chain nat-prerouting-and-output {
+        iifname != "docker0" tcp dport 8080 counter packets 0 bytes 0 dnat to 172.17.0.2:80 comment "DNAT"
+    }
+
+    chain raw-PREROUTING {
+        type filter hook prerouting priority raw; policy accept;
+        ip daddr 172.17.0.2 iifname != "docker0" counter packets 0 bytes 0 drop comment "DROP DIRECT ACCESS"
+    }
+
+    chain filter-forward-in__docker0 {
+        ct state established,related counter packets 0 bytes 0 accept
+        iifname "docker0" counter packets 0 bytes 0 accept comment "ICC"
+        ip daddr 172.17.0.2 tcp dport 80 counter packets 0 bytes 0 accept
+        counter packets 0 bytes 0 drop comment "UNPUBLISHED PORT DROP"
+    }
+
+    chain filter-forward-out__docker0 {
+        ct state established,related counter packets 0 bytes 0 accept
+        counter packets 0 bytes 0 accept comment "OUTGOING"
+    }
+
+    chain nat-postrouting-in__docker0 {
+    }
+
+    chain nat-postrouting-out__docker0 {
+        oifname != "docker0" ip saddr 172.17.0.0/16 counter packets 0 bytes 0 masquerade comment "MASQUERADE"
+    }
 }
 ```
 
@@ -652,11 +652,11 @@ table ip docker-bridges {
 `docker-proxy`라는 프로세스가 포트 포워딩하는 포트를 점유함을 볼 수 있다.
 ```bash
 root@ubuntu:~# docker run -d --name nginx -p 8080:80 nginx
-8e241826e0620f38049fb96f5c4c5781c89ff3acd8e61545953310aec4cc5479 
-root@ubuntu:~# ss -ntlp 
-State Recv-Q Send-Q Local Address:Port Peer Address:Port Process 
+8e241826e0620f38049fb96f5c4c5781c89ff3acd8e61545953310aec4cc5479
+root@ubuntu:~# ss -ntlp
+State Recv-Q Send-Q Local Address:Port Peer Address:Port Process
 ...
-LISTEN 0 4096 0.0.0.0:8080 0.0.0.0:* users:(("docker-proxy",pid=11562,fd=8)) 
+LISTEN 0 4096 0.0.0.0:8080 0.0.0.0:* users:(("docker-proxy",pid=11562,fd=8))
 ...
 ```
 
@@ -683,8 +683,8 @@ systemctl restart docker
 `[::1]:8080->80`과 같은 IPv6 -> IPv4 변환은 `route_localnet`으로도 여전히 한계가 있다고 한다.
 
 ```bash
-root@cp-1:~# docker ps 
-CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES 
+root@cp-1:~# docker ps
+CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 618abe9aff42 nginx "/docker-entrypoint.…" 11 seconds ago Up 11 seconds 0.0.0.0:8080->80/tcp nginx
 ```
 
@@ -692,52 +692,52 @@ CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 여기서도 `[::1]:8080`은 점유하지 않는 것을 볼 수 있다.
 
 ```bash
-root@cp-1:~# ss -ntlp 
-State Recv-Q Send-Q Local Address:Port Peer Address:Port Process 
-LISTEN 0 4096 0.0.0.0:8080 0.0.0.0:* users:(("dockerd",pid=19866,fd=30)) 
+root@cp-1:~# ss -ntlp
+State Recv-Q Send-Q Local Address:Port Peer Address:Port Process
+LISTEN 0 4096 0.0.0.0:8080 0.0.0.0:* users:(("dockerd",pid=19866,fd=30))
 ```
 
 docker0의 `route_localnet`이 `1`로 활성화되었다.
 이제 `127.0.0.0/8` 대역을 대상으로 하는 트래픽도 라우팅 가능해진다.
 ```bash
-root@cp-1:~# sysctl -a | grep docker0.route_localnet 
+root@cp-1:~# sysctl -a | grep docker0.route_localnet
 net.ipv4.conf.docker0.route_localnet = 1
 ```
 
 `nft list ruleset`으로 다시 규칙들을 확인해보자.
 ```nginx
-table inet nat {  
-	# ...
-	chain DOCKER { 
-		tcp dport 8080 counter packets 0 bytes 0 dnat to 172.17.0.2:80 
-	}
-	
-	chain OUTPUT {  
-		type nat hook output priority dstnat; policy accept;  
-		# daddr != 127.0.0.1/8조건이 사라져있다,
-		fib daddr type local counter packets 0 bytes 0 jump DOCKER  
-	}  
-	
-	chain POSTROUTING {
-		type nat hook postrouting priority srcnat; policy accept; 
-		# 추가: host -> host port -> container로 연결되도록 함. 
-		# src = 127.0.0.1, dst = 127.0.0.1:8080에서
-		# OUTPUT DNAT를 거치고, src = 127.0.0.1, dst = 172.17.0.2:80으로 바뀐 이후
-		# 이 rule을 만나서 MASQUERADE되어
-		# src = 172.17.0.1, dst = 172.17.0.2:80으로 변환.
-		oifname "docker0" fib saddr type local counter packets 0 bytes 0 masquerade 
-		ip saddr 172.17.0.0/16 oifname != "docker0" counter packets 0 bytes 0 masquerade 
-		# 추가: 컨테이너 -> host port -> 자기 자신으로 통하도록 
-		# src = 172.17.0.2, dst = HostIP:8080으로 하는 경우
-		# OUTPUT에 의해  src = 172.17.0.2 dst = 172.17.0.2:80
-		# 이는 Host의 conntrack/NAT경로를 정상적으로 돌아오지 못할 수 있음.
-		# 그래서 이 rule에서는 다음처럼 바꿈:
-		# src = 172.17.0.1, dst = 172.17.0.2:80
-		ip saddr 172.17.0.2 ip daddr 172.17.0.2 tcp dport 80 counter packets 0 bytes 0 masquerade
-	}
-	
-	# ...
-}  
+table inet nat {
+    # ...
+    chain DOCKER {
+        tcp dport 8080 counter packets 0 bytes 0 dnat to 172.17.0.2:80
+    }
+
+    chain OUTPUT {
+        type nat hook output priority dstnat; policy accept;
+        # daddr != 127.0.0.1/8조건이 사라져있다,
+        fib daddr type local counter packets 0 bytes 0 jump DOCKER
+    }
+
+    chain POSTROUTING {
+        type nat hook postrouting priority srcnat; policy accept;
+        # 추가: host -> host port -> container로 연결되도록 함.
+        # src = 127.0.0.1, dst = 127.0.0.1:8080에서
+        # OUTPUT DNAT를 거치고, src = 127.0.0.1, dst = 172.17.0.2:80으로 바뀐 이후
+        # 이 rule을 만나서 MASQUERADE되어
+        # src = 172.17.0.1, dst = 172.17.0.2:80으로 변환.
+        oifname "docker0" fib saddr type local counter packets 0 bytes 0 masquerade
+        ip saddr 172.17.0.0/16 oifname != "docker0" counter packets 0 bytes 0 masquerade
+        # 추가: 컨테이너 -> host port -> 자기 자신으로 통하도록
+        # src = 172.17.0.2, dst = HostIP:8080으로 하는 경우
+        # OUTPUT에 의해  src = 172.17.0.2 dst = 172.17.0.2:80
+        # 이는 Host의 conntrack/NAT경로를 정상적으로 돌아오지 못할 수 있음.
+        # 그래서 이 rule에서는 다음처럼 바꿈:
+        # src = 172.17.0.1, dst = 172.17.0.2:80
+        ip saddr 172.17.0.2 ip daddr 172.17.0.2 tcp dport 80 counter packets 0 bytes 0 masquerade
+    }
+
+    # ...
+}
 # ...
 ```
 
@@ -887,12 +887,12 @@ ip netns exec ns1 ping 8.8.8.8
 `conntrack`으로 추적도 해보자.
 ```bash
 root@ubuntu:~# conntrack -L -p tcp
-tcp 6 8 TIME_WAIT 
-	# 원래 방향 tuple
-	src=127.0.0.1 dst=127.0.0.1 sport=60712 dport=8080 
-	# 응답 방향 tuple
-	src=172.18.0.2 dst=172.18.0.1 sport=80 dport=60712
-	[ASSURED]
+tcp 6 8 TIME_WAIT
+    # 원래 방향 tuple
+    src=127.0.0.1 dst=127.0.0.1 sport=60712 dport=8080
+    # 응답 방향 tuple
+    src=172.18.0.2 dst=172.18.0.1 sport=80 dport=60712
+    [ASSURED]
 ```
 ---
 ## 📚 References
