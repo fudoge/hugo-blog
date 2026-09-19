@@ -29,7 +29,7 @@ While rebuilding my homelab, I installed **Cilium** as the CNI for a k3s cluster
 Both components appeared to work correctly on their own, but using them together caused Cilium L7 traffic to time out.
 
 This post traces the packet path from Cilium's TPROXY redirect to the point where Linux source validation drops the packet with `IP_LOCAL_SOURCE`.  
-The analysis showed that **`net.ipv4.conf.all.src_valid_mark=1`**, enabled by tailscaled, was interacting with Cilium's **fwmark-based TPROXY routing** under this specific set of conditions.
+The analysis showed that `net.ipv4.conf.all.src_valid_mark=1`, enabled by tailscaled, was interacting with Cilium's **fwmark-based TPROXY routing** under this specific set of conditions.
 
 The following posts provide useful background on the path from `ip` commands and Netfilter to policy routing, source validation, and TPROXY:
 
@@ -164,7 +164,7 @@ Run the DNS lookup again in another terminal:
 kubectl -n cilium-test exec curl -- nslookup google.com
 ```
 
-The monitor output records the policy verdict for endpoint `1885` as **`action redirect`** and **`to-proxy`**. This confirms that the DNS L7 rule redirects the packet to the node-local TPROXY path.
+The monitor output records the policy verdict for endpoint `1885` as `action redirect` and `to-proxy`. This confirms that the DNS L7 rule redirects the packet to the node-local TPROXY path.
 
 ```text
 Policy verdict log: flow 0x98fc9bfe local EP ID 1885, remote ID 19110,
@@ -222,7 +222,7 @@ location=ip_rcv_finish_core+0x233/0x360 reason: IP_LOCAL_SOURCE
 
 ### Tracing source validation in the kernel
 
-The cause becomes clear in the Linux kernel source validation function, `__fib_validate_source()`. If the reverse FIB lookup returns a local route while **`accept_local=0`**, the kernel drops the packet with `IP_LOCAL_SOURCE`.
+The cause becomes clear in the Linux kernel source validation function, `__fib_validate_source()`. If the reverse FIB lookup returns a local route while `accept_local=0`, the kernel drops the packet with `IP_LOCAL_SOURCE`.
 
 ```c
 static int __fib_validate_source(struct sk_buff *skb, __be32 src, __be32 dst,
@@ -332,9 +332,9 @@ accept_local=0
 IP_LOCAL_SOURCE
 ```
 
-In this case, the **`skb->mark=0x200`** set by Cilium for L7 processing participated in the reverse lookup because tailscaled had enabled **`src_valid_mark=1`**. The lookup selected Cilium's local route, which then combined with the default **`accept_local=0`** setting and resulted in an `IP_LOCAL_SOURCE` drop.
+In this case, the `skb->mark=0x200` set by Cilium for L7 processing participated in the reverse lookup because tailscaled had enabled `src_valid_mark=1`. The lookup selected Cilium's local route, which then combined with the default `accept_local=0` setting and resulted in an `IP_LOCAL_SOURCE` drop.
 
-This behavior may not be limited to Tailscale. Another tool that sets **`net.ipv4.conf.all.src_valid_mark=1`** on the node could potentially trigger the same interaction with Cilium's routing rules.
+This behavior may not be limited to Tailscale. Another tool that sets `net.ipv4.conf.all.src_valid_mark=1` on the node could potentially trigger the same interaction with Cilium's routing rules.
 
 ---
 ## 🛠️ Mitigation and Deployment Options

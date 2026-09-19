@@ -29,7 +29,7 @@ categories:
 두 구성 요소는 각각 정상적으로 보였지만, 함께 사용하자 Cilium의 L7 트래픽이 타임아웃되는 문제가 발생했다.
 
 이 글에서는 패킷이 Cilium의 TPROXY로 리다이렉트된 뒤 커널의 source validation에서 `IP_LOCAL_SOURCE`로 드롭되는 과정을 추적한다.  
-분석 결과, tailscaled가 활성화한 **`net.ipv4.conf.all.src_valid_mark=1`**과 Cilium의 **fwmark 기반 TPROXY routing**이 특정 조건에서 충돌하고 있었다.
+분석 결과, tailscaled가 활성화한 `net.ipv4.conf.all.src_valid_mark=1`과 Cilium의 **fwmark 기반 TPROXY routing**이 특정 조건에서 충돌하고 있었다.
 
 아래 글을 먼저 읽으면 `ip` 명령어부터 Netfilter, policy routing, source validation, TPROXY까지 이어지는 흐름을 이해하는 데 도움이 된다.
 
@@ -247,7 +247,7 @@ kubectl -n kube-system exec -it cilium-<hash> -- \
 kubectl -n cilium-test exec curl -- nslookup google.com
 ```
 
-monitor 로그에는 endpoint `1885`의 policy verdict가 **`action redirect`**, **`to-proxy`**로 기록된다. 즉, DNS L7 규칙에 따라 패킷이 노드의 TPROXY로 넘어간다.
+monitor 로그에는 endpoint `1885`의 policy verdict가 `action redirect`, `to-proxy`로 기록된다. 즉, DNS L7 규칙에 따라 패킷이 노드의 TPROXY로 넘어간다.
 
 ```text
 Policy verdict log: flow 0x98fc9bfe local EP ID 1885, remote ID 19110, proto 17, egress, action redirect, auth: disabled, match L3-L4, 10.217.0.124:49595 -> 10.217.0.76:53 udp
@@ -298,7 +298,7 @@ grep -i 'IP_LOCAL_SOURCE' "$T/trace"
 
 ### 커널 source validation 코드 추적
 
-Linux 커널의 source validation 함수인 `__fib_validate_source()`를 보면 원인이 드러난다. reverse FIB lookup 결과가 local route인데 **`accept_local=0`**이면 커널은 패킷을 `IP_LOCAL_SOURCE`로 드롭한다.
+Linux 커널의 source validation 함수인 `__fib_validate_source()`를 보면 원인이 드러난다. reverse FIB lookup 결과가 local route인데 `accept_local=0`이면 커널은 패킷을 `IP_LOCAL_SOURCE`로 드롭한다.
 
 ```c
 /* Given (packet source, input interface) and optional (dst, oif, tos):
@@ -434,7 +434,7 @@ accept_local=0
 IP_LOCAL_SOURCE
 ```
 
-이 사례에서는 Cilium이 L7 처리를 위해 설정한 **`skb->mark=0x200`**이 tailscaled가 활성화한 **`src_valid_mark=1`** 때문에 reverse lookup에 참여했다. 이 lookup이 Cilium의 local route를 선택하고, 기본값인 **`accept_local=0`**과 만나면서 `IP_LOCAL_SOURCE` drop으로 이어졌다.
+이 사례에서는 Cilium이 L7 처리를 위해 설정한 `skb->mark=0x200`이 tailscaled가 활성화한 `src_valid_mark=1` 때문에 reverse lookup에 참여했다. 이 lookup이 Cilium의 local route를 선택하고, 기본값인 `accept_local=0`과 만나면서 `IP_LOCAL_SOURCE` drop으로 이어졌다.
 
 따라서 비슷한 현상은 Tailscale에만 국한되지 않을 수 있다. 노드에서 **`net.ipv4.conf.all.src_valid_mark=1`을 설정하는 다른 도구**도 동일한 Cilium routing 조건과 만나면 영향을 줄 가능성이 있다.
 
