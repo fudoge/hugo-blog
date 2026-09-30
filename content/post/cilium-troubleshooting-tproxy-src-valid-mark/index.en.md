@@ -2,7 +2,7 @@
 title: "Investigating a Conflict Between Cilium and Node-Level tailscaled"
 description: "A kernel tracing and FIB lookup analysis of Cilium L7 TPROXY traffic being dropped with IP_LOCAL_SOURCE after interacting with src_valid_mark enabled by tailscaled"
 date: 2026-09-14T15:43:19+09:00
-lastmod: 2026-09-14T15:43:19+09:00
+lastmod: 2026-09-30T10:42:15+09:00
 slug: cilium-troubleshooting-tproxy-src-valid-mark
 image:
 math: false
@@ -222,9 +222,12 @@ location=ip_rcv_finish_core+0x233/0x360 reason: IP_LOCAL_SOURCE
 
 ### Tracing source validation in the kernel
 
-The cause becomes clear in the Linux kernel source validation function, `__fib_validate_source()`. If the reverse FIB lookup returns a local route while `accept_local=0`, the kernel drops the packet with `IP_LOCAL_SOURCE`.
+First, `fib_validate_source()` can enter `__fib_validate_source()` even when `rp_filter=0`. That setting disables RPF, but it does not skip every source check. In this environment, Cilium's custom `ip rule` sends packets with `accept_local=0` through the full-check path.
+
+The drop becomes clear in `__fib_validate_source()`: if the reverse FIB lookup returns a local route while `accept_local=0`, the kernel drops the packet with `IP_LOCAL_SOURCE`.
 
 ```c
+// source: net/ipv4/fib_frontend.c
 static int __fib_validate_source(struct sk_buff *skb, __be32 src, __be32 dst,
                                  dscp_t dscp, int oif, struct net_device *dev,
                                  int rpf, struct in_device *idev, u32 *itag)
@@ -339,7 +342,7 @@ This behavior may not be limited to Tailscale. Another tool that sets `net.ipv4.
 ---
 ## 🛠️ Mitigation and Deployment Options
 
-If Tailscale must run directly on a Kubernetes node using Cilium, it is worth checking the interaction between **L7/FQDN policies and `src_valid_mark`** first. Setting `accept_local=1` can remove the immediate symptom, but it changes source validation behavior and should only be applied after reviewing its wider impact.
+If Tailscale must run directly on a Kubernetes node using Cilium, it is worth checking the interaction between **L7/FQDN policies and `src_valid_mark`** first. In the reproduced setup, setting `accept_local=1` on the affected `lxc*` interface removed the symptom. This changes source validation behavior, so its wider impact should be reviewed before applying it.
 
 For access to cluster services, the [Tailscale Kubernetes Operator](https://tailscale.com/docs/kubernetes-operator) is another option. It manages Tailscale connectivity through Kubernetes resources instead of relying on host-level tailscaled networking.
 
@@ -348,9 +351,201 @@ If the main goal is SSH access to nodes, routing the node subnet through a **Sub
 ---
 ## 📣 Reported to Cilium
 
-I reported the behavior as [Cilium Issue #48706](https://github.com/cilium/cilium/issues/48706). The analysis in this post is based on the reproduction results and the observed kernel path, while further upstream confirmation is still pending.
+I reported the behavior as [Cilium Issue #48706](https://github.com/cilium/cilium/issues/48706). The initial analysis was based on the reproduction results and the kernel code. The PR discussion and maintainer feedback led to the following updates.
 
-I will update this post if the issue receives additional findings or an upstream change.
+### Related PR discussion (Sep 21–22, closed without merge)
+
+Early on September 22, a contributor opened a PR to resolve the issue I had reported.
+
+The change enabled `accept_local` on `lxc*` interfaces created with veth or netkit.
+
+My earlier A/B test had also shown that traffic flowed normally when `accept_local` was enabled on the `lxc*` interface.
+
+The PR author argued that this introduced no additional risk because Cilium already validates the source in its eBPF program through `is_valid_lxc_src_ipv4()`, in place of the kernel's `rp_filter`.
+
+A maintainer then asked:
+
+- If Cilium disables `rp_filter`, why does `fib_validate_source()` still run and perform RPF?
+- Could Cilium override the global `src_valid_mark` setting so the mark is excluded from the check? Why enable `accept_local` instead?
+
+The PR author replied:
+
+- **Why `fib_validate_source()` still runs with `rp_filter=0`:** The kernel evaluates `rp_filter` through the `IN_DEV_MAXCONF()` macro, taking the larger of `conf.all.rp_filter` and `conf.<dev>.rp_filter`. Many modern Linux distributions set `net.ipv4.conf.all.rp_filter` to 1 (strict) or 2 (loose) by default. The author therefore reasoned that even if Cilium sets the interface value to 0, the kernel evaluates `max(all, dev) = max(1, 0) = 1` and runs RPF and `fib_validate_source()`.
+- **Why `src_valid_mark=0` cannot be set just on `lxc*`:** The author had initially considered this approach. But `src_valid_mark` is evaluated through `IN_DEV_ORCONF()`, so if a program such as Tailscale sets `net.ipv4.conf.all.src_valid_mark=1`, setting the interface value to 0 still leaves the effective value at 1.
+- **Why the author considered `accept_local` the only solution:** The author argued that node-wide `rp_filter` and `src_valid_mark` settings made `fib_validate_source()` unavoidable, leaving `accept_local` as the way to allow this traffic.
+
+Separately, the PR was closed without a merge after a dispute between its author and a maintainer about the AI policy.
+
+### Maintainer response on the issue (Sep 22–present)
+
+On September 22, a maintainer responded on the issue:
+
+- After the PR discussion, the maintainer said Tailscale should not set `net.ipv4.conf.all.src_valid_mark=1`, arguing that it breaks interoperability with networking software beyond Cilium.
+- Setting `src_valid_mark=1` on a specific interface would be understandable if Tailscale managed that interface (for example, WireGuard) and its routing. The global setting, however, conflicts with Cilium's handling of proxy traffic between Kubernetes Pods and the host.
+- The [kernel documentation](https://www.kernel.org/doc/html/latest/networking/ip-sysctl.html) explains why `src_valid_mark=0` is needed for this use case:
+
+> src_valid_mark - BOOLEAN
+> 0 - The fwmark of the packet is not included in reverse path route lookup. This allows for asymmetric routing configurations utilizing the fwmark in only one direction, e.g., transparent proxying.
+>
+> 1 - The fwmark of the packet is included in reverse path route lookup. This permits rp_filter to function when the fwmark is used for routing traffic in both directions.
+>
+> This setting also affects the utilization of fmwark when performing source address selection for ICMP replies, or determining addresses stored for the IPOPT_TS_TSANDADDR and IPOPT_RR IP options.
+>
+> The max value from conf/{all,interface}/src_valid_mark is used.
+>
+> Default value is 0.
+
+The maintainer added:
+
+- The [kernel documentation](https://www.kernel.org/doc/html/latest/networking/ip-sysctl.html) describes `accept_local` as follows:
+
+> accept_local - BOOLEAN
+>
+> Accept packets with local source addresses. In combination with suitable routing, this can be used to > direct packets between two local interfaces over the wire and have them accepted properly. default FALSE
+
+- The maintainer was unsure what “local source address” meant here. The IP is in another network namespace, but the FIB appears to classify it as local.
+- The setting has a limited scope and seems to focus on whether traffic from a Pod into the host stack has a valid source address.
+- The traffic has already passed Cilium's Pod egress BPF program. The maintainer said additional reverse-path protection could provide related filtering and is already applied by default.
+- Based on my A/B test, enabling this setting could mitigate the issue.
+
+I replied on September 23:
+
+- The discussion had focused on Tailscale, but NetBird also sets `net.ipv4.conf.all.src_valid_mark=1`. The direction for resolving Cilium issue #41991 and the related NetBird issue #4575 was still unsettled.
+- Tailscale had a draft PR (#19860) to remove `conf.all.src_valid_mark=1` and replace it with a per-interface `iif` policy routing rule.
+- My question had become whether to treat this as a Tailscale-specific issue or consider compatibility with networking software that enables `src_valid_mark` globally.
+- The earlier PR implementing the discussed mitigation had been closed, so I would hold off on opening a new PR and wait for further discussion.
+
+While revisiting the reproduction, I found an error in the PR discussion and left another comment on September 29.
+
+**The distribution's global default is not why `fib_validate_source()` runs with `rp_filter=0`.** Many distributions do default `all.rp_filter` to 1 or 2, but Cilium changes it to 0.
+
+These were the default settings on Ubuntu 26.04 LTS:
+
+```bash
+root@cp-1:~# sysctl net.ipv4.conf.all.rp_filter
+net.ipv4.conf.all.rp_filter = 2
+
+root@cp-1:~# sysctl net.ipv4.conf.eth0.rp_filter
+net.ipv4.conf.eth0.rp_filter = 2
+```
+
+After initializing the cluster with kubeadm and installing Cilium 1.20.1, the values changed:
+
+```bash
+root@cp-1:~# sysctl net.ipv4.conf.all.rp_filter
+net.ipv4.conf.all.rp_filter = 0
+
+root@cp-1:~# sysctl net.ipv4.conf.eth0.rp_filter
+net.ipv4.conf.eth0.rp_filter = 2
+
+# Example veth pair
+root@cp-1:~# sysctl net.ipv4.conf.lxcf3591bba91d5.rp_filter
+net.ipv4.conf.lxcf3591bba91d5.rp_filter = 0
+```
+
+So the effective `rp_filter` value on an `lxc*` interface can be 0.
+
+The next question is whether `fib_validate_source()` still runs when that value is 0. The relevant code is:
+
+```c
+// source: net/ipv4/fib_frontend.c
+/* Ignore rp_filter for packets protected by IPsec. */
+int fib_validate_source(struct sk_buff *skb, __be32 src, __be32 dst,
+			dscp_t dscp, int oif, struct net_device *dev,
+			struct in_device *idev, u32 *itag)
+{
+    // Use 0 for IPsec packets; otherwise use the effective rp_filter value.
+	int r = secpath_exists(skb) ? 0 : IN_DEV_RPFILTER(idev);
+	struct net *net = dev_net(dev);
+
+	if (!r && !fib_num_tclassid_users(net) &&
+	    (dev->ifindex != oif || !IN_DEV_TX_REDIRECTS(idev))) {
+		if (IN_DEV_ACCEPT_LOCAL(idev))
+			goto ok;
+
+		/* with custom local routes in place, checking local addresses
+		 * only will be too optimistic, with custom rules, checking
+		 * local addresses only can be too strict, e.g. due to vrf
+		 */
+        // ⭐ Even with r=0, custom local routes or rules send us to __fib_validate_source().
+		if (net->ipv4.fib_has_custom_local_routes ||
+		    fib4_has_custom_rules(net))
+			goto full_check;
+		/* Within the same container, it is regarded as a martian source,
+		 * and the same host but different containers are not.
+		 */
+		if (inet_lookup_ifaddr_rcu(net, src))
+			return -SKB_DROP_REASON_IP_LOCAL_SOURCE;
+
+ok:
+		*itag = 0;
+		return 0;
+	}
+
+full_check:
+	return __fib_validate_source(skb, src, dst, dscp, oif, dev, r, idev,
+				     itag);
+}
+```
+
+**Once execution enters `__fib_validate_source()`, this packet is dropped with `IP_LOCAL_SOURCE` regardless of `rpf`.** The relevant branch is:
+
+```c
+// source: net/ipv4/fib_frontend.c
+/* Given (packet source, input interface) and optional (dst, oif, tos):
+ * - (main) check, that source is valid i.e. not broadcast or our local
+ *   address.
+ * - figure out what "logical" interface this packet arrived
+ *   and calculate "specific destination" address.
+ * - check, that packet arrived from expected physical interface.
+ * called with rcu_read_lock()
+ */
+static int __fib_validate_source(struct sk_buff *skb, __be32 src, __be32 dst,
+				 dscp_t dscp, int oif, struct net_device *dev,
+				 int rpf, struct in_device *idev, u32 *itag)
+{
+// ...
+
+	// With src_valid_mark=1, include the packet mark in the reverse lookup.
+	fl4.flowi4_mark = IN_DEV_SRC_VMARK(idev) ? skb->mark : 0;
+	if (!fib4_rules_early_flow_dissect(net, skb, &fl4, &flkeys)) {
+		fl4.flowi4_proto = 0;
+		fl4.fl4_sport = 0;
+		fl4.fl4_dport = 0;
+	} else {
+		swap(fl4.fl4_sport, fl4.fl4_dport);
+	}
+
+	if (fib_lookup(net, &fl4, &res, 0))
+		goto last_resort;
+	if (res.type != RTN_UNICAST) {
+		if (res.type != RTN_LOCAL) {
+			reason = SKB_DROP_REASON_IP_INVALID_SOURCE;
+			goto e_inval;
+		} else if (!IN_DEV_ACCEPT_LOCAL(idev)) {
+			// This packet is dropped with IP_LOCAL_SOURCE before the rpf check below.
+			reason = SKB_DROP_REASON_IP_LOCAL_SOURCE;
+			goto e_inval;
+		}
+	}
+	fib_combine_itag(itag, &res);
+
+	dev_match = fib_info_nh_uses_dev(res.fi, dev);
+	/* This is not common, loopback packets retain skb_dst so normally they
+	 * would not even hit this slow path.
+	 */
+	dev_match = dev_match || (res.type == RTN_LOCAL &&
+				  dev == net->loopback_dev);
+	if (dev_match) {
+		ret = FIB_RES_NHC(res)->nhc_scope >= RT_SCOPE_HOST;
+		return ret;
+	}
+	if (no_addr)
+		goto last_resort;
+	if (rpf == 1)
+		goto e_rpf;
+// ...
+```
 
 ---
 ## 📚 References

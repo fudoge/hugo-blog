@@ -2,6 +2,7 @@
 title: "Linux Network - Routing(2)"
 description: "Linux 커널의 IPv4 ingress routing decision, FIB lookup, source validation, local delivery 흐름을 소스 코드로 따라가보자"
 date: 2026-09-07T21:02:18+09:00
+lastmod: 2026-09-30T10:42:15+09:00
 image:
 math: false
 license:
@@ -698,7 +699,8 @@ out:
 앞의 소스들에서 `fib_validate_source()`를 몇 번 보았다.  
 source IP가 유효한지 검사하는 로직이다.  
 
-일부 케이스에서는 빠르게 판단하려는 fast path가 있고, custom `ip rule`이 있는 경우에는 full check를 실행한다.  
+일부 케이스에서는 빠르게 판단하려는 fast path가 있다. `rp_filter=0`이어도 모든 출발지 검사가 생략되는 것은 아니다. `accept_local=0`이고 custom `ip rule`이 있다면 full check로 이동할 수 있다.
+
 또 forwarding 중에 source IP가 자기 자신이면 이상한 패킷으로 보고 drop하는 것을 볼 수 있다.  
 
 ```c
@@ -709,7 +711,7 @@ int fib_validate_source(struct sk_buff *skb, __be32 src, __be32 dst,
 {
 	// RPF: Reverse Path Filtering
 	//     역방향 lookup과 ingress의 인터페이스가 같은지 조회하고, 이에 따른 필터링
-	//     0: No source validation
+	//     0: RPF 기반 source validation 비활성화 (다른 출발지 검사는 남을 수 있음)
 	//     1: Strict mode as defined in RFC 3704.
 	//     2: Loose mode as defined in RFC 3704.
 	// secpath_exists: IPSec등의 보호된 패킷인지 조회 후, 보호된 패킷이면 0으로 설정.
@@ -754,8 +756,7 @@ full_check:
 }
 ```
 
-full check 로직인 `__fib_validate_source()`에서는 역방향 FIB lookup을 실행한다.  
-두 번의 lookup이 진행되는데, 하나는 best path를 찾기 위한 것이고, 그 다음 하나는 ingress interface와 비교하기 위한 부가 정보를 확인하는 과정이다.  
+full check 로직인 `__fib_validate_source()`에서는 역방향 FIB lookup을 실행한다. 첫 번째 lookup 결과에 따라 드롭하거나 반환할 수 있다. 검사가 계속 필요하면 ingress interface를 지정해 두 번째 lookup을 실행한다.
 
 ```c
 // source: net/ipv4/fib_frontend.c

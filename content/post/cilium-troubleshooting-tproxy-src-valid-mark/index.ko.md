@@ -2,7 +2,7 @@
 title: "Cilium과 노드의 tailscaled가 충돌한 이유"
 description: "Cilium L7 TPROXY 트래픽이 tailscaled가 활성화한 src_valid_mark와 충돌해 IP_LOCAL_SOURCE로 드롭된 사례를 커널 tracing과 FIB lookup으로 분석한다"
 date: 2026-09-14T15:43:19+09:00
-lastmod: 2026-09-14T15:43:19+09:00
+lastmod: 2026-09-30T10:42:15+09:00
 slug: cilium-troubleshooting-tproxy-src-valid-mark
 image:
 math: false
@@ -298,9 +298,12 @@ grep -i 'IP_LOCAL_SOURCE' "$T/trace"
 
 ### 커널 source validation 코드 추적
 
-Linux 커널의 source validation 함수인 `__fib_validate_source()`를 보면 원인이 드러난다. reverse FIB lookup 결과가 local route인데 `accept_local=0`이면 커널은 패킷을 `IP_LOCAL_SOURCE`로 드롭한다.
+먼저 `fib_validate_source()`가 `rp_filter=0`일 때도 `__fib_validate_source()`로 들어갈 수 있는지 확인해야 한다. `rp_filter=0`은 RPF를 끄는 설정이지, 이 함수의 모든 출발지 검사를 건너뛴다는 뜻은 아니다. 이 환경에서는 Cilium이 추가한 custom `ip rule`이 있으므로, `accept_local=0`인 패킷은 fast path에서 바로 반환하지 않고 full check로 이동한다. 해당 조건은 글 아래의 9월 29일 재확인 부분에서 코드와 함께 살펴본다.
+
+full check인 `__fib_validate_source()`를 보면 드롭 원인이 드러난다. reverse FIB lookup 결과가 local route인데 `accept_local=0`이면 커널은 패킷을 `IP_LOCAL_SOURCE`로 드롭한다.
 
 ```c
+// source: net/ipv4/fib_frontend.c
 /* Given (packet source, input interface) and optional (dst, oif, tos):
  * - (main) check, that source is valid i.e. not broadcast or our local
  *   address.
@@ -441,7 +444,7 @@ IP_LOCAL_SOURCE
 ---
 ## 🛠️ 해결 방안과 권장 구성
 
-Cilium을 사용하는 Kubernetes 노드에 Tailscale을 직접 설치해야 한다면, 먼저 **L7/FQDN policy와 `src_valid_mark`의 상호작용을 확인하는 것이 좋다.** `accept_local=1`로 증상을 해소할 수는 있지만, source validation 정책을 바꾸는 조치이므로 적용 전 영향 범위를 충분히 검토해야 한다.
+Cilium을 사용하는 Kubernetes 노드에 Tailscale을 직접 설치해야 한다면, 먼저 **L7/FQDN policy와 `src_valid_mark`의 상호작용을 확인하는 것이 좋다.** 재현 환경에서는 해당 `lxc*` 인터페이스의 `accept_local=1`로 증상을 해소할 수 있었지만, source validation 정책을 바꾸는 조치이므로 적용 전 영향 범위를 충분히 검토해야 한다.
 
 클러스터 서비스에 접근하려는 목적이라면 [Tailscale Kubernetes Operator](https://tailscale.com/docs/kubernetes-operator)를 사용해 Tailscale 연결을 Kubernetes 리소스로 관리하는 방법도 고려할 수 있다.
 
@@ -450,9 +453,197 @@ Cilium을 사용하는 Kubernetes 노드에 Tailscale을 직접 설치해야 한
 ---
 ## 📣 GitHub Issue 제보
 
-Cilium 저장소에 이 현상을 [Issue #48706](https://github.com/cilium/cilium/issues/48706)으로 제보했다. 현재 분석 내용은 재현 결과와 커널 코드에 근거한 것이며, upstream의 추가 확인을 기다리고 있다.
+Cilium 저장소에 이 현상을 [Issue #48706](https://github.com/cilium/cilium/issues/48706)으로 제보했다. 제보 당시의 분석은 재현 결과와 커널 코드에 근거한 것이었고, 이후 PR 논의와 maintainer 답변을 통해 추가로 확인한 내용을 아래에 기록했다.
 
-응답이나 upstream 변경 사항이 확인되면 이 글에도 반영할 예정이다.
+### 관련 PR 논의 (09.21~22, Closed without merge)
+
+9월 22일 새벽, 한 사용자가 내가 제기한 이슈를 해결하는 PR을 열었다.
+
+변경 내용은 veth/netkit으로 생성되는 `lxc*` 인터페이스에서 `accept_local`을 활성화하는 것이었다.
+
+앞선 A/B 테스트에서도 `lxc*` 인터페이스의 `accept_local`을 활성화하면 트래픽이 정상적으로 흐르는 것을 확인했다.
+
+PR 작성자는 Cilium이 이미 eBPF 프로그램의 `is_valid_lxc_src_ipv4()`에서 커널의 `rp_filter`를 대신해 검증하므로 추가적인 위험은 없다고 주장했다.
+
+이후 한 maintainer가 질문했다.
+
+- Cilium이 `rp_filter`를 비활성화하는데도 왜 `fib_validate_source()`가 실행되고 RPF가 진행되는가?
+- Cilium이 전역 `src_valid_mark` 설정을 덮어써서 마크를 검사하지 않도록 하면 되지 않는가? 굳이 `accept_local`을 활성화해야 하는가?
+
+PR 작성자는 다음과 같이 답했다.
+
+- **`rp_filter=0`인데도 `fib_validate_source()`가 실행되는 이유:** 리눅스 커널은 `IN_DEV_MAXCONF()` 매크로를 통해 `conf.all.rp_filter`와 `conf.<dev>.rp_filter` 중 큰 값을 사용한다. 대부분의 현대 리눅스 배포판에서 `net.ipv4.conf.all.rp_filter`의 기본값은 1(strict) 또는 2(loose)이다. 따라서 Cilium이 장치의 `rp_filter`를 0으로 설정해도, 커널은 `max(all, dev) = max(1, 0) = 1`로 평가해 RPF와 `fib_validate_source()`를 실행한다는 설명이었다.
+- **`lxc*` 장치에서 `src_valid_mark=0`으로 덮어쓸 수 없는 이유:** PR 작성자도 처음에는 이 방법을 생각했다고 한다. 하지만 `src_valid_mark`는 `IN_DEV_ORCONF()` 매크로로 평가되므로, Tailscale 같은 프로그램이 `net.ipv4.conf.all.src_valid_mark=1`로 설정하면 장치의 값을 0으로 바꿔도 평가 결과는 1이 된다고 설명했다.
+- **`accept_local`이 유일한 해결책이라고 본 이유:** 전역 노드 설정의 `rp_filter`와 `src_valid_mark` 때문에 `fib_validate_source()`를 피할 수 없으므로, `accept_local`을 활성화해야 한다는 주장이었다.
+
+별개로 이 PR은 작성자와 maintainer 사이의 AI 정책 관련 논쟁으로 인해 병합 없이 닫혔다.
+
+### maintainer의 이슈 답변 (09.22~현재)
+
+9월 22일, maintainer가 이슈에 답변했다.
+
+- 앞선 PR 논의를 거친 뒤, Tailscale이 `net.ipv4.conf.all.src_valid_mark=1`로 설정해서는 안 된다고 생각한다고 했다. Cilium뿐 아니라 다른 네트워킹 스택 소프트웨어와의 상호 운용성도 깨뜨린다는 것이다.
+- Tailscale이 특정 장치(예: WireGuard)와 해당 장치의 라우팅을 담당한다면, 그 장치에서 `src_valid_mark=1`로 설정하는 것은 이해할 수 있다고 했다. 하지만 현재 설정은 Cilium이 노드 내에서 프록시 트래픽을 전달하며 Kubernetes Pod와 통신하는 과정과 충돌한다.
+- [커널 문서](https://www.kernel.org/doc/html/latest/networking/ip-sysctl.html)는 이 사례에서 `src_valid_mark=0`이 필요한 이유를 다음과 같이 설명한다.
+
+> src_valid_mark - BOOLEAN
+> 0 - The fwmark of the packet is not included in reverse path route lookup. This allows for asymmetric routing configurations utilizing the fwmark in only one direction, e.g., transparent proxying.
+>
+> 1 - The fwmark of the packet is included in reverse path route lookup. This permits rp_filter to function when the fwmark is used for routing traffic in both directions.
+>
+> This setting also affects the utilization of fmwark when performing source address selection for ICMP replies, or determining addresses stored for the IPOPT_TS_TSANDADDR and IPOPT_RR IP options.
+>
+> The max value from conf/{all,interface}/src_valid_mark is used.
+>
+> Default value is 0.
+
+maintainer는 다음과 같은 의견도 덧붙였다.
+
+- [커널 문서](https://www.kernel.org/doc/html/latest/networking/ip-sysctl.html)는 `accept_local`을 다음과 같이 설명한다.
+
+> accept_local - BOOLEAN
+>
+> Accept packets with local source addresses. In combination with suitable routing, this can be used to > direct packets between two local interfaces over the wire and have them accepted properly. default FALSE
+
+- 여기서 말하는 "local source address"의 의미는 명확하지 않지만, IP가 다른 netns에 있더라도 FIB 분류 결과는 local인 것으로 추정했다.
+- 이 설정은 적용 범위가 제한적이며, 이 시나리오에서 Pod에서 호스트 스택으로 향하는 트래픽의 출발지 주소가 '유효한지'에 초점을 맞춘다고 봤다.
+- 해당 트래픽은 이미 Cilium의 Pod egress BPF 프로그램을 통과한다. 따라서 추가적인 reverse path 보호로 관련 필터링을 적용할 수 있으며, 기본적으로 이미 적용되고 있다고 설명했다.
+- 내 A/B 테스트 결과를 근거로, 이 설정을 활성화하는 것이 이 문제의 완화책이 될 수 있다고 봤다.
+
+9월 23일, 나는 다음과 같이 답했다.
+
+- 논의가 Tailscale에 국한되어 있었지만, NetBird도 `net.ipv4.conf.all.src_valid_mark=1`을 설정한다. Cilium 이슈 #41991과 관련 NetBird 이슈 #4575에서도 해결 방향이 아직 정리되지 않았다.
+- Tailscale에서는 `conf.all.src_valid_mark=1` 설정을 제거하고 per-interface `iif` policy routing rule로 대체하려는 draft PR(#19860)이 진행 중이다.
+- 이제는 이 문제를 Tailscale만의 문제로 볼지, `src_valid_mark`를 전역으로 활성화하는 네트워킹 소프트웨어 전반과의 호환성을 고려할지가 궁금하다.
+- 앞서 논의한 완화책을 구현하던 PR이 닫힌 상태이므로, 당장 새 PR을 만들지는 않고 좀 더 지켜보겠다.
+
+이후 재현 과정을 다시 살펴보다가 PR 논의에 일부 오류가 있음을 발견해 9월 29일에 추가 코멘트를 남겼다.
+
+**`rp_filter=0`인데도 `fib_validate_source()`가 실행되는 이유는 배포판의 전역 기본 설정 때문이 아니다.** 많은 리눅스 배포판에서 `all.rp_filter`의 기본값이 1 또는 2인 것은 맞지만, Cilium은 이를 0으로 변경한다.
+
+다음은 Ubuntu 26.04 LTS의 기본 설정이다.
+```bash
+root@cp-1:~# sysctl net.ipv4.conf.all.rp_filter
+net.ipv4.conf.all.rp_filter = 2
+
+root@cp-1:~# sysctl net.ipv4.conf.eth0.rp_filter
+net.ipv4.conf.eth0.rp_filter = 2
+```
+
+kubeadm으로 클러스터를 초기화하고 Cilium 1.20.1을 설치하면 다음과 같이 바뀐다.
+```bash
+root@cp-1:~# sysctl net.ipv4.conf.all.rp_filter
+net.ipv4.conf.all.rp_filter = 0
+
+root@cp-1:~# sysctl net.ipv4.conf.eth0.rp_filter
+net.ipv4.conf.eth0.rp_filter = 2
+
+# veth pair 하나 예시
+root@cp-1:~# sysctl net.ipv4.conf.lxcf3591bba91d5.rp_filter
+net.ipv4.conf.lxcf3591bba91d5.rp_filter = 0
+```
+
+즉, `lxc*` 인터페이스에서 `rp_filter`의 평가값은 0이 될 수 있다.
+
+그렇다면 `rp_filter`의 평가값이 0일 때도 `fib_validate_source()`가 실행되는지 살펴보자.
+```c
+// source: net/ipv4/fib_frontend.c
+/* Ignore rp_filter for packets protected by IPsec. */
+int fib_validate_source(struct sk_buff *skb, __be32 src, __be32 dst,
+			dscp_t dscp, int oif, struct net_device *dev,
+			struct in_device *idev, u32 *itag)
+{
+    // IPsec 패킷이면 0, 아니면 `rp_filter` 평가값을 사용
+	int r = secpath_exists(skb) ? 0 : IN_DEV_RPFILTER(idev);
+	struct net *net = dev_net(dev);
+
+	if (!r && !fib_num_tclassid_users(net) &&
+	    (dev->ifindex != oif || !IN_DEV_TX_REDIRECTS(idev))) {
+		if (IN_DEV_ACCEPT_LOCAL(idev))
+			goto ok;
+
+		/* with custom local routes in place, checking local addresses
+		 * only will be too optimistic, with custom rules, checking
+		 * local addresses only can be too strict, e.g. due to vrf
+		 */
+        // ⭐ r=0이어도 custom local route 또는 custom rule이 있으면 full_check(__fib_validate_source())로 이동한다.
+		if (net->ipv4.fib_has_custom_local_routes ||
+		    fib4_has_custom_rules(net))
+			goto full_check;
+		/* Within the same container, it is regarded as a martian source,
+		 * and the same host but different containers are not.
+		 */
+		if (inet_lookup_ifaddr_rcu(net, src))
+			return -SKB_DROP_REASON_IP_LOCAL_SOURCE;
+
+ok:
+		*itag = 0;
+		return 0;
+	}
+
+full_check:
+	return __fib_validate_source(skb, src, dst, dscp, oif, dev, r, idev,
+				     itag);
+}
+```
+
+**`__fib_validate_source()`에 진입하면, 이 사례에서는 `rpf` 값과 관계없이 `IP_LOCAL_SOURCE`로 드롭된다.** 해당 분기를 살펴보자.
+```c
+// source: net/ipv4/fib_frontend.c
+/* Given (packet source, input interface) and optional (dst, oif, tos):
+ * - (main) check, that source is valid i.e. not broadcast or our local
+ *   address.
+ * - figure out what "logical" interface this packet arrived
+ *   and calculate "specific destination" address.
+ * - check, that packet arrived from expected physical interface.
+ * called with rcu_read_lock()
+ */
+static int __fib_validate_source(struct sk_buff *skb, __be32 src, __be32 dst,
+				 dscp_t dscp, int oif, struct net_device *dev,
+				 int rpf, struct in_device *idev, u32 *itag)
+{
+// ...
+
+	// src_valid_mark=1이면 패킷의 mark를 reverse lookup에 반영한다.
+	fl4.flowi4_mark = IN_DEV_SRC_VMARK(idev) ? skb->mark : 0;
+	if (!fib4_rules_early_flow_dissect(net, skb, &fl4, &flkeys)) {
+		fl4.flowi4_proto = 0;
+		fl4.fl4_sport = 0;
+		fl4.fl4_dport = 0;
+	} else {
+		swap(fl4.fl4_sport, fl4.fl4_dport);
+	}
+
+	if (fib_lookup(net, &fl4, &res, 0))
+		goto last_resort;
+	if (res.type != RTN_UNICAST) {
+		if (res.type != RTN_LOCAL) {
+			reason = SKB_DROP_REASON_IP_INVALID_SOURCE;
+			goto e_inval;
+		} else if (!IN_DEV_ACCEPT_LOCAL(idev)) {
+			// 이 사례는 아래의 rpf 검사 전에 IP_LOCAL_SOURCE로 드롭된다.
+			reason = SKB_DROP_REASON_IP_LOCAL_SOURCE;
+			goto e_inval;
+		}
+	}
+	fib_combine_itag(itag, &res);
+
+	dev_match = fib_info_nh_uses_dev(res.fi, dev);
+	/* This is not common, loopback packets retain skb_dst so normally they
+	 * would not even hit this slow path.
+	 */
+	dev_match = dev_match || (res.type == RTN_LOCAL &&
+				  dev == net->loopback_dev);
+	if (dev_match) {
+		ret = FIB_RES_NHC(res)->nhc_scope >= RT_SCOPE_HOST;
+		return ret;
+	}
+	if (no_addr)
+		goto last_resort;
+	if (rpf == 1)
+		goto e_rpf;
+// ...
+```
 
 ---
 ## 📚 References

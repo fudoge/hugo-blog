@@ -2,6 +2,7 @@
 title: "Linux Network - Routing(2)"
 description: "Trace Linux kernel IPv4 ingress routing decisions, FIB lookup, source validation, and local delivery through source code"
 date: 2026-09-07T21:02:18+09:00
+lastmod: 2026-09-30T10:42:15+09:00
 image:
 math: false
 license:
@@ -699,7 +700,8 @@ out:
 We have seen `fib_validate_source()` several times in the previous snippets.  
 This logic checks whether the source IP is valid.  
 
-Some cases take a fast path, while systems with custom `ip rule` entries run a full check.  
+Some cases take a fast path. Setting `rp_filter=0` does not skip every source check. With `accept_local=0`, a custom `ip rule` can send validation through the full-check path.
+
 You can also see that if the source IP is one of the host's own addresses while forwarding, the packet is treated as suspicious and dropped.  
 
 ```c
@@ -710,7 +712,7 @@ int fib_validate_source(struct sk_buff *skb, __be32 src, __be32 dst,
 {
 	// RPF: Reverse Path Filtering
 	//     Checks whether the reverse-path lookup uses the ingress interface, then filters accordingly
-	//     0: No source validation
+	//     0: RPF-based source validation disabled (other source checks may still run)
 	//     1: Strict mode as defined in RFC 3704.
 	//     2: Loose mode as defined in RFC 3704.
 	// secpath_exists: checks whether the packet is protected by IPsec or similar; if so, set to 0.
@@ -755,8 +757,7 @@ full_check:
 }
 ```
 
-The full-check path, `__fib_validate_source()`, performs a reverse FIB lookup.  
-Two lookups are involved. The first finds the best path, and the second checks additional information for comparison against the ingress interface.  
+The full-check path, `__fib_validate_source()`, performs a reverse FIB lookup. It may drop or return after the first lookup. If validation needs to continue, it runs a second lookup with the ingress interface specified.
 
 ```c
 // source: net/ipv4/fib_frontend.c
