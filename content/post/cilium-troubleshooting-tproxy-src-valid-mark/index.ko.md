@@ -487,6 +487,7 @@ PR 작성자는 다음과 같이 답했다.
 - [커널 문서](https://www.kernel.org/doc/html/latest/networking/ip-sysctl.html)는 이 사례에서 `src_valid_mark=0`이 필요한 이유를 다음과 같이 설명한다.
 
 > src_valid_mark - BOOLEAN
+>
 > 0 - The fwmark of the packet is not included in reverse path route lookup. This allows for asymmetric routing configurations utilizing the fwmark in only one direction, e.g., transparent proxying.
 >
 > 1 - The fwmark of the packet is included in reverse path route lookup. This permits rp_filter to function when the fwmark is used for routing traffic in both directions.
