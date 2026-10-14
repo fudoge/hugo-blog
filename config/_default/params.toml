@@ -2,7 +2,7 @@
 mainSections = ["post"]
 # Output page's full content in RSS.
 rssFullContent = true
-favicon = "/favicon.ico"
+favicon = "img/favicon.ico"
 
 [footer]
 since = 2025
@@ -15,11 +15,7 @@ lastUpdated = ":date_full"
 [sidebar]
 emoji = "🫧"
 subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-
-[sidebar.avatar]
-enabled = true
-local = true
-src = "/img/glaceon.png"
+avatar = "img/glaceon.png"
 
 [article]
 headingAnchor = false
@@ -59,16 +55,11 @@ type = "toc"
 site = ""
 card = "summary_large_image"
 
-[defaultImage.opengraph]
-enabled = false
-local = false
-src = ""
-
 [colorScheme]
 toggle = true
 default = "auto"
 
-[imageProcessing.cover]
+[imageProcessing.thumbnail]
 enabled = true
 
 [imageProcessing.content]
