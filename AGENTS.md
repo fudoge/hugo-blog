@@ -18,6 +18,7 @@ When asked to polish, refine, or improve a newly added post:
 6. Break dense passages into short paragraphs, add brief transitions, and explain why an example matters. Avoid padding the post with unrelated background material.
 7. Fill an incomplete section only when its intended content is clear from the surrounding article. Otherwise keep the scope honest and report the gap.
 8. Apply the front matter, heading, emphasis, code, reference, multilingual, and validation rules below.
+9. Preserve the author's explanation format where practical. If you change it—for example, turn bullets into prose, remove a quote, or reorganize sections—explicitly describe that change in the final report.
 
 “Polish” includes readability, document structure, metadata, formatting consistency, and obvious correctness fixes. It does not authorize a wholesale rewrite, a change of technical conclusions, or publication outside this repository.
 
@@ -130,6 +131,7 @@ Also:
 - Treat `index.ko.md` and `index.en.md` in the same bundle as translations of one article.
 - When both versions contain real content, keep their section order, code examples, source comments, diagrams, conclusions, and references synchronized.
 - Translate meaning and tone, not Korean word order.
+- Preserve the author's original English technical terms in Korean posts. Do not force established terms into Korean; use the English term alone or alongside a Korean explanation where that reads naturally.
 - Localize titles, descriptions, section headings, transitions, and explanatory prose. Keep code, identifiers, commands, and URLs unchanged unless the code itself needs correction.
 - After writing English, search for accidental Korean text. After changing a shared code example, check both files.
 - Do not create or publish a missing language version unless the user asks for it. A placeholder draft is not a completed translation.
@@ -140,7 +142,7 @@ Also:
 - Use descriptive Markdown links for external references.
 - Prefer primary sources: official documentation, specifications, upstream source code, or the project repository.
 - Keep a final section named `## 📚 References` when the article relies on external material.
-- Do not carry a reference into a translation if it no longer supports the translated claim.
+- You may add items to an existing `References` section, but never remove an existing item. If a reference no longer supports a claim, correct the claim or clarify the reference's context without deleting the item.
 
 ## Validation
 
