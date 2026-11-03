@@ -1,6 +1,6 @@
 ---
 title: "Cilium과 노드의 tailscaled가 충돌한 이유"
-description: "Cilium L7 TPROXY 트래픽이 tailscaled가 활성화한 src_valid_mark와 충돌해 IP_LOCAL_SOURCE로 드롭된 사례를 커널 tracing과 FIB lookup으로 분석한다"
+description: "Cilium L7 TPROXY 트래픽이 tailscaled가 활성화한 src_valid_mark와 충돌해 IP_LOCAL_SOURCE로 드롭된 사례를 커널 tracing과 FIB lookup으로 분석"
 date: 2026-09-14T15:43:19+09:00
 lastmod: 2026-09-30T10:42:15+09:00
 slug: cilium-troubleshooting-tproxy-src-valid-mark

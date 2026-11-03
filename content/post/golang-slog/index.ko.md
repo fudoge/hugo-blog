@@ -1,6 +1,6 @@
 ---
 title: "Go slog로 구조화된 로그 간단하게 남기기"
-description: "Go 표준 라이브러리 log/slog의 기본 사용법부터 Handler, With, LogAttrs, Context, Group 활용법까지 예제로 알아본다"
+description: "Go 표준 라이브러리 log/slog의 기본 사용법부터 Handler, With, LogAttrs, Context, Group 활용법까지 알아보자"
 date: 2026-09-20T00:45:23+09:00
 lastmod: 2026-09-20T00:45:23+09:00
 slug: golang-slog

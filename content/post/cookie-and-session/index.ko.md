@@ -1,6 +1,6 @@
 ---
 title: "쿠키와 세션으로 이해하는 웹의 상태 관리"
-description: "HTTP 쿠키가 세션 ID를 전달하는 과정부터 쿠키의 범위, 만료, 보안 속성과 CSRF 방어까지 실습으로 살펴본다"
+description: "HTTP 쿠키가 세션 ID를 전달하는 과정부터 쿠키의 범위, 만료, 보안 속성과 CSRF 방어까지 살펴보자"
 date: 2026-11-02T14:39:28+09:00
 lastmod: 2026-11-02T17:30:00+09:00
 slug: cookie-and-session
