@@ -2,7 +2,7 @@
 title: "Understanding OAuth 2.0 and the PKCE Flow"
 description: "Explore OAuth 2.0 roles, grant types, tokens, and scopes, then walk through the Authorization Code flow with PKCE."
 date: 2026-11-05T15:07:03+09:00
-lastmod: 2026-11-06T19:16:01+09:00
+lastmod: 2026-11-08T17:29:07+09:00
 slug: what-is-oauth
 image: protocol.png
 math: false
@@ -149,7 +149,7 @@ The PKCE parameters and transformation rules are defined in [RFC 7636](https://w
     - Usually lasts longer than an Access Token, but issuance and lifetime depend on service policy. Expiration or revocation may require the user to go through authorization again.
 - ID Token:
     - Defined by OIDC, rather than OAuth 2.0 itself, to communicate the result of user authentication to the Client.
-    - Serves a different purpose from the Access Token used to call the Resource Server. I will cover it in a future post on OIDC.
+    - Serves a different purpose from the Access Token used to call the Resource Server. See the [OIDC post]({{< relref "post/what-is-oidc" >}}) for details.
 
 ### Scopes
 

@@ -2,7 +2,7 @@
 title: "OAuth 2.0 - 어떻게 서드 파티 애플리케이션과 연동해서 리소스를 주고받을까?"
 description: "OAuth 2.0의 역할과 Grant 유형, Token과 Scope를 살펴보고 Authorization Code와 PKCE 흐름을 실습해보자."
 date: 2026-11-05T15:07:01+09:00
-lastmod: 2026-11-06T18:54:10+09:00
+lastmod: 2026-11-08T17:21:47+09:00
 slug: what-is-oauth
 image: protocol.png
 math: false
@@ -150,7 +150,7 @@ PKCE의 파라미터와 변환 규칙은 [RFC 7636](https://www.rfc-editor.org/r
     - 일반적으로 Access Token보다 오래 유지되지만, 발급 여부와 수명은 서비스 정책에 따라 다르다. 만료되거나 철회되면 다시 인가 절차를 진행해야 할 수 있다.
 - ID Token:
     - OAuth 2.0 자체가 아니라 OIDC에서 정의하며, 사용자 인증 결과를 Client에 전달한다.
-    - Resource Server 호출에 사용하는 Access Token과 용도가 다르다. 자세한 내용은 추후 OIDC 글에서 다룬다.
+    - Resource Server 호출에 사용하는 Access Token과 용도가 다르다. 자세한 내용은 [OIDC 글]({{< relref "post/what-is-oidc" >}})에서 다룬다.
 
 ### Scope
 
