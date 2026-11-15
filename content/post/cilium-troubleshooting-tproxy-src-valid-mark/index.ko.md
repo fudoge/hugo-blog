@@ -298,7 +298,7 @@ grep -i 'IP_LOCAL_SOURCE' "$T/trace"
 
 ### 커널 source validation 코드 추적
 
-먼저 `fib_validate_source()`가 `rp_filter=0`일 때도 `__fib_validate_source()`로 들어갈 수 있는지 확인해야 한다. `rp_filter=0`은 RPF를 끄는 설정이지, 이 함수의 모든 출발지 검사를 건너뛴다는 뜻은 아니다. 이 환경에서는 Cilium이 추가한 custom `ip rule`이 있으므로, `accept_local=0`인 패킷은 fast path에서 바로 반환하지 않고 full check로 이동한다. 해당 조건은 글 아래의 9월 29일 재확인 부분에서 코드와 함께 살펴본다.
+먼저 `fib_validate_source()`가 `rp_filter=0`일 때도 `__fib_validate_source()`로 들어갈 수 있는지 확인한다. 이 환경에서는 custom `ip rule`을 Cilium이 추가했으므로, `accept_local=0`인 패킷은 fast path에서 바로 반환하지 않고 full check로 이동한다.  
 
 full check인 `__fib_validate_source()`를 보면 드롭 원인이 드러난다. reverse FIB lookup 결과가 local route인데 `accept_local=0`이면 커널은 패킷을 `IP_LOCAL_SOURCE`로 드롭한다.
 
