@@ -412,10 +412,10 @@ wgengine/router/osrouter/router_linux.go
 | `1` | `0` | O | `table 2004 → local dev lo → RTN_LOCAL` | **Timeout** | `IP_LOCAL_SOURCE` |
 | `1` | `1` | O | `table 2004 → local dev lo → RTN_LOCAL` | 정상 | 없음 |
 
-오직 **`src_valid_mark=1`이면서 `accept_local=0`인 조합**에서 DNS 요청이 실패한다. 이 결과는 앞서 확인한 커널 코드의 분기와 정확히 일치한다.
+**`src_valid_mark=1`이면서 `accept_local=0`인 조합**에서만 DNS 요청이 실패한다.
 
 ---
-## 🧭 패킷 드롭 흐름 정리
+## 🧭 드롭 과정 요약
 
 전체 흐름을 한 줄씩 연결하면 다음과 같다.
 
