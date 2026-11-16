@@ -43,9 +43,9 @@ build:
 4. CloudWatch Alarm이 메트릭 누락을 감지하면 Slack 알림용 Lambda를 호출한다.
 5. 메트릭이 다시 들어와 Alarm이 `OK`로 전환되면 복구 알림도 보낸다.
 
-Watchdog을 heartbeat로 사용하고, CloudWatch가 이 신호의 부재를 감시하는 Dead Man's Switch 구성이다. DynamoDB에 마지막 수신 시각을 따로 저장하지 않고, 커스텀 메트릭과 Alarm만으로 상태를 판단하는 구조이다.
+Watchdog을 heartbeat로 사용하고, CloudWatch가 이 신호의 부재를 감시하는 Dead Man's Switch 구성이다. 별도 DynamoDB 등을 사용하지 않고, 커스텀 메트릭과 Alarm만으로 상태를 판단하는 구조이다.
 
-다만, 이 신호가 도착한다고 해서 클러스터의 모든 서비스가 정상이라는 뜻은 아니다. 확인하는 범위는 Watchdog 생성부터 Alertmanager, 외부 네트워크, SNS, 메트릭 기록까지의 경로이다.
+다만, 이 신호가 도착한다고 해서 클러스터의 모든 서비스가 정상이라는 뜻은 아니다. 확인하는 범위는 Alertmanager가 watchdog으로 AWS서비스들에 접근하는 것이니, 클러스터 자체가 살아 있느냐에 대한 정보만 알려준다.
 
 이 구성으로 잡지 못하는 문제도 있다.
 
@@ -210,7 +210,7 @@ resource "aws_cloudwatch_log_group" "heartbeat" {
 
 ## 📮 SNS 연결
 
-처음에는 API Gateway에 Lambda를 붙이는 방식으로 구현했다. 그러나 공개 엔드포인트를 노출하기 싫은 것도 있고, SNS로 연결하는 것이 더 깔끔한 구조라고 생각해서 SNS로 트리거하는 방식을 선택했다.
+처음에는 API Gateway에 Lambda를 붙이는 방식을 구현하였으나, 공개 엔드포인트를 노출하기 싫은 것도 있고, SNS로 연결하는 것이 더 깔끔한 구조라고 생각해서 SNS로 트리거하는 방식을 선택했다.
 
 ```hcl
 # AWS managed key로 암호화한다.
