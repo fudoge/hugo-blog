@@ -43,9 +43,9 @@ build:
 4. CloudWatch Alarm이 메트릭 누락을 감지하면 Slack 알림용 Lambda를 호출한다.
 5. 메트릭이 다시 들어와 Alarm이 `OK`로 전환되면 복구 알림도 보낸다.
 
-Watchdog을 heartbeat로 사용하고, CloudWatch가 이 신호의 부재를 감시하는 Dead Man's Switch 구성이다. 별도 DynamoDB 등을 사용하지 않고, 커스텀 메트릭과 Alarm만으로 상태를 판단하는 구조이다.
+별도 외부 DB같은 저장소에 이전 헬스체크 시각을 저장하지 않는다. 대신, Watchdog을 heartbeat로 사용하고, CloudWatch가 이 신호의 부재를 감시하는 Dead Man's Switch 구성이다. 
 
-다만, 이 신호가 도착한다고 해서 클러스터의 모든 서비스가 정상이라는 뜻은 아니다. 확인하는 범위는 Alertmanager가 watchdog으로 AWS서비스들에 접근하는 것이니, 클러스터 자체가 살아 있느냐에 대한 정보만 알려준다.
+다만, 이 신호가 도착한다고 해서 클러스터의 모든 서비스가 정상이라는 뜻은 아니다. 확인하는 범위는 Alertmanager가 watchdog으로 AWS서비스들에 접근하는 것이니, 클러스터 자체가 살아 있느냐에 대한 정보는 알 수 있다.
 
 이 구성으로 잡지 못하는 문제도 있다.
 
@@ -108,7 +108,7 @@ def lambda_handler(event, context):
 
 메시지가 오지 않더라도 `0`을 기록하지 않는데, 해당 구간의 데이터가 비게 되고, 뒤에서 `treat_missing_data`로 이를 장애로 취급한다.
 
-Terraform에서는 함수의 실행 역할에 `cloudwatch:PutMetricData` 권한을 부여한다. 이 작업은 개별 메트릭 ARN으로 제한할 수 없으므로 `Resource = "*"`를 사용하고, 대신 `cloudwatch:namespace` 조건으로 기록 가능한 namespace를 제한해야 한다.
+Terraform에서는 함수의 실행 역할에 `cloudwatch:PutMetricData` 권한을 부여한다. 이 작업은 개별 메트릭 ARN으로 제한할 수 없어 `Resource = "*"`를 사용하고, 대신 `cloudwatch:namespace` 조건으로 기록 가능한 namespace를 제한한다.
 
 아래는 Terraform 예시이다.
 
@@ -394,7 +394,7 @@ Alarm은 Lambda가 기록한 커스텀 메트릭을 평가한다. 설정의 의�
 | `datapoints_to_alarm = 3` | 평가한 3개가 모두 위반일 때 `ALARM`으로 전환한다. |
 | `treat_missing_data = "breaching"` | 평가에 필요한 데이터가 부족하면 누락된 포인트를 위반으로 취급한다. |
 
-정상일 때는 수신한 heartbeat가 `1`로 기록된다. 수신이 멈추면 데이터가 누락된다. 이 누락을 `breaching`으로 처리하는 것이 핵심이다.
+정상일 때는 수신한 heartbeat가 `1`로 기록된다. 수신이 멈추면 해당 시간의 데이터가 누락된다. 이 누락을 `breaching`으로 처리하는 것이 핵심이다.
 
 다만 **마지막 heartbeat를 받은 시점부터 정확히 3분 뒤에 알림이 오는 것은 아니다**. 기본 평가 방식에서 CloudWatch는 지정한 3개 구간보다 넓은 범위의 데이터를 조회하고, 실제 데이터가 충분하면 이전 포인트를 평가에 사용할 수 있다. 필요한 경우에만 누락 데이터 처리 설정을 적용하므로, 구간 경계와 메트릭 반영 시점도 감지 시간에 영향을 준다. 자세한 규칙은 [CloudWatch의 누락 데이터 평가 문서](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html)를 참고하면 된다.
 
@@ -440,9 +440,9 @@ CloudWatch는 `ALARM`과 `OK`로 상태가 바뀔 때 각각 `alarm_actions`와 
 
 Watchdog 규칙은 Prometheus에서 항상 firing 상태를 유지하도록 만든 알림이다. Alertmanager가 이를 SNS로 반복 전송하도록 설정하면 주기적인 heartbeat로 사용할 수 있다.
 
-아래 Helm values의 토큰과 볼륨 설정은 AWS OIDC Federation을 위한 것이다. 자세한 구성은 [Kubernetes와 AWS의 OIDC Federation]({{< relref "post/k8s-aws-federation" >}}) 글을 참고하면 된다. `AWS_ROLE_ARN`은 자신의 Alertmanager 역할 ARN으로 바꿔야 한다.
+아래 Helm values의 토큰과 볼륨 설정은 AWS OIDC Federation을 위한 값들이다. 자세한 구성은 [Kubernetes와 AWS의 OIDC Federation]({{< relref "post/k8s-aws-federation" >}}) 글을 참고하면 된다. `AWS_ROLE_ARN`은 자신의 Alertmanager 역할 ARN으로 바꿔야 한다.
 
-이 역할에는 대상 토픽에 대한 `sns:Publish` 권한이 필요하다. 앞의 예시처럼 SNS 토픽을 KMS로 암호화했다면, 발행 역할에 해당 키의 `kms:GenerateDataKey*`와 `kms:Decrypt` 권한도 필요하다. [SNS 암호화 권한 문서](https://docs.aws.amazon.com/sns/latest/dg/sns-key-management.html)에 따라 키 접근 권한도 함께 확인한다.
+이 역할에는 대상 토픽에 대한 `sns:Publish` 권한이 필요하다. 앞의 예시처럼 SNS 토픽을 KMS로 암호화했다면, 발행 역할에 해당 키의 `kms:GenerateDataKey*`와 `kms:Decrypt` 권한도 필요하다.
 
 ```yaml
 alertmanager:
