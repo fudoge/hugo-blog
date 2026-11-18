@@ -194,8 +194,6 @@ CFS는 모든 runnable task들이 이 스케줄링 기간 안에는 한 번씩�
 
 그리고 task는 최대한 `min_granularity_ns`만큼 실행되도록 한다.   
 
-nice값 처리에도 좋은데, nice값이 높으면 vruntime이 더 크게 늘어나서 결과적으로 CPU를 덜 받게 된다.   
-
 SMP(멀티코어) 로드밸런싱에서도 단순해졌는데, 복잡한 runqueue-walking assumption이 사라지고, 스케줄링 모듈에서의 iterator를 이용하여 밸런싱 코드가 단순해지고 안전해졌다.   
 
 ### CFS정책
