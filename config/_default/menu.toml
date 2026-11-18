@@ -33,3 +33,12 @@ weight = 3
 
 [[social.params]]
 icon = "chart-bar"
+
+[[social]]
+identifier = "email"
+name = "Email"
+url = "mailto:me@chaewoon.work"
+weight = 4
+
+[[social.params]]
+icon = "mail"
